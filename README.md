@@ -1,0 +1,2 @@
+# Interactive Constrained Clustering
+ Clustering algorithms are very popular methods. However, these algorithms usually need to be tuned by the end users to correspond to some preconceptions. This process is iterative and time consuming. The goal of this project is to develop an UI that will help in the refinement process. The user preferences will be provided and the algorithm will incorporate the new knowledge provided. Moreover, this interface will also be able to initiate this process by asking for potentially important information from the user.
