@@ -7,14 +7,16 @@ import matplotlib.pyplot as plt
 import sys
 import pickle
 from sklearn.neighbors import NearestNeighbors
-from sklearn.datasets import load_boston
+import pandas as pd
+from pandas.api.types import is_string_dtype
 # Importing a custom metric class
 from distython import HEOM
 
 
 def create_model(clustering_iter, question_num, cluster_num, export=False):
     # y is target = Goal of ML
-    data, y = datasets.load_iris(return_X_y=True)
+    data, y = datasets.load_breast_cancer(return_X_y=True)
+    print(data)
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
         # Used until own oracle implemented.
@@ -46,6 +48,15 @@ def create_model(clustering_iter, question_num, cluster_num, export=False):
     else:
         compute_questions(data, model.labels_, clustering_iter, question_num)
 
+def gather_data_information(data):
+    df = pd.DataFrame(data=data)
+    category_columns = []
+    #Determine which columns are categorical
+    for i in range(0,len(df.columns)):
+        if is_string_dtype(df[0]):
+            category_columns.append(i)
+    print("Category Columns:", category_columns)
+    return category_columns
 
 def export_model(model):
     # dump (obj, open(filename, mode))
@@ -53,9 +64,16 @@ def export_model(model):
 
 
 def compute_questions(data, labels, clustering_iter, question_num):
-    categorical_ix = [0]
-    heom_metric = HEOM(data, categorical_ix)
-    neighbor = NearestNeighbors(metric=heom_metric.heom)
+    categorical_ix = gather_data_information(data)
+    if not categorical_ix:
+        #For situation where all numeric columns
+        print("Running minkowski algo")
+        neighbor = NearestNeighbors()
+    else:
+        #For situation where a category exists that is not numerical
+        print("Running HEOM algo")
+        heom_metric = HEOM(data, categorical_ix)
+        neighbor = NearestNeighbors(metric=heom_metric.heom)
     neighbor.fit(data)
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
     sil_arr = metrics.silhouette_samples(data, labels)
@@ -76,10 +94,10 @@ def compute_questions(data, labels, clustering_iter, question_num):
         found = True
         index = 2
         while found:
-            neighbor_value = neighbor.kneighbors(
+            neighbor_index = neighbor.kneighbors(
                 data[value].reshape(1, -1), n_neighbors=(index+1))[1][0, index]
-            if labels[neighbor_value] != labels[value[0]]:
-                question_set.append((value[0], neighbor_value))
+            if labels[neighbor_index] != labels[value[0]]:
+                question_set.append((value[0], neighbor_index))
                 found = False
             index += 1
     print(question_set)
