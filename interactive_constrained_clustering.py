@@ -106,7 +106,7 @@ def compute_questions(data, labels, clustering_iter, question_num):
                 question_set.append((value[0], neighbor_index))
                 found = False
             index += 1
-    # print(question_set)
+    print("Question Set: ",question_set)
     # Send the indecies for the bottom values to React.
 
 '''
@@ -118,7 +118,7 @@ def gather_data_information(data):
     category_columns = []
     # Determine which columns are categorical
     for i in range(0, len(df.columns)):
-        if is_string_dtype(df[0]):
+        if is_string_dtype(df[i]):
             category_columns.append(i)
     #print("Category Columns:", category_columns)
     return category_columns
