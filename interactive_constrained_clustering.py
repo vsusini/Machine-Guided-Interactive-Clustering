@@ -143,7 +143,9 @@ try:
 except IndexError:
     export = False
 
-if bool(export):
-    create_model(cluster_iter, question_num, cluster_num, ml, cl, export=True)
-else:
-    create_model(cluster_iter, question_num, cluster_num, ml, cl)
+print(cluster_num)
+
+# if bool(export):
+#     create_model(cluster_iter, question_num, cluster_num, ml, cl, export=True)
+# else:
+#     create_model(cluster_iter, question_num, cluster_num, ml, cl)

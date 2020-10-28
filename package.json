@@ -1,0 +1,26 @@
+{
+  "name": "interactive-constrained-clustering",
+  "version": "1.0.0",
+  "description": "Clustering algorithms are very popular methods. However, these algorithms usually need to be tuned by the end users to correspond to some preconceptions. This process is iterative and time consuming. The goal of this project is to develop an UI that will help in the refinement process. The user preferences will be provided and the algorithm will incorporate the new knowledge provided. Moreover, this interface will also be able to initiate this process by asking for potentially important information from the user.",
+  "main": "index.js",
+  "scripts": {
+    "server": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vsusini/Interactive-Constrained-Clustering.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vsusini/Interactive-Constrained-Clustering/issues"
+  },
+  "homepage": "https://github.com/vsusini/Interactive-Constrained-Clustering#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.0",
+    "nodemon": "^2.0.6"
+  }
+}
