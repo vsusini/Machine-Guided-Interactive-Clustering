@@ -1,7 +1,8 @@
 import './App.css';
-import FileUpload from './components/inputForm/inputForm';
 import React, { Component } from 'react';
 import axios from 'axios';
+import Router from './components/router'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export class FormInput {
   questionsPerIteration = ""
@@ -10,9 +11,10 @@ export class FormInput {
 
 export const AppContext = React.createContext({
   dataArr: null,
+  iterationCount: null,
   testObj: FormInput,
   saveData: () => { },
-  runPython: () => { },
+  runPython: (iteration_num, question_num, cluster_num) => { },
 });
 
 class App extends Component {
@@ -21,16 +23,20 @@ class App extends Component {
     super(props);
     this.state = {
       dataArr: null,
+      iterationCount: 7,
       testObj: "",
       saveData: this.saveData,
       runPython: this.runPython,
     };
   }
 
-  runPython = () => {
-    console.log("Starting")
+  runPython = (iteration_num, question_num, cluster_num) => {
+    console.log("Need Loading Symbol to Display Loading while the python finishes")
+    this.setState({ iterationCount: this.state.iterationCount + 1})
     const formData = new FormData();
-    formData.append('param1', 0); // appending file
+    formData.append('interation_num', iteration_num);
+    formData.append('question_num', question_num)
+    formData.append('cluster_num', cluster_num)
     axios.post('http://localhost:4500/python', formData, {
     }).then(res => {
       console.log(res);
@@ -40,21 +46,15 @@ class App extends Component {
   }
 
   saveData = (e) => {
-    console.log("made it", e)
+    console.log(e)
     this.setState({ dataArr: e })
   }
 
   render() {
-    let printData = () => {
-      console.log(this.state.testObj)
-    }
     return (
       <div className="App">
         <AppContext.Provider value={this.state}>
-          <FileUpload></FileUpload>
-          <button onClick={printData} className="upbutton">
-            View DatatArr
-          </button>
+          <Router></Router>
         </AppContext.Provider>
       </div>
     );

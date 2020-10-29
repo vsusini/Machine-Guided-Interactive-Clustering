@@ -25,11 +25,14 @@ app.post('/upload', (req, res) => {
 })
 
 app.post('/python', (req, res) => {
-    // accessing the file
-    const text = req.param1;
+    var pythonArr = ['interactive_constrained_clustering.py']
+    for (const key in req.body) {
+        pythonArr.push(req.body[key]);
+    }
+    console.log(pythonArr)
 
     const spawn = require('child_process').spawn;
-    const ls = spawn('python', ['interactive_constrained_clustering.py', '2', '10', "2"]);
+    const ls = spawn('python', pythonArr);
 
     var values
 

@@ -26,12 +26,13 @@ def create_model(clustering_iter, question_num, cluster_num, must_link_constrain
         model = PCKMeans(n_clusters=cluster_num)
         model.fit(data, ml=ml_con, cl=cl_con)
     else:
+        print("Running first iteration")
         model = PCKMeans(n_clusters=cluster_num)
         model.fit(data)
 
     # Creation of graph for image.
     plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap='viridis')
-    plt.savefig("images/clusterImg"+cluster_iter)
+    plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
     if export:
         export_model(model)
@@ -136,7 +137,7 @@ ml = [(0, 1), (2, 10), (0, 10), (30, 31)]
 cl = [(40, 41), (42, 41)]
 
 try:
-    if str(sys.argv[4]) == "export":
+    if str(sys.argv[6]) == "export":
         export = True
     else:
         export = False
@@ -145,7 +146,7 @@ except IndexError:
 
 print(cluster_num)
 
-# if bool(export):
-#     create_model(cluster_iter, question_num, cluster_num, ml, cl, export=True)
-# else:
-#     create_model(cluster_iter, question_num, cluster_num, ml, cl)
+if bool(export):
+    create_model(cluster_iter, question_num, cluster_num, ml, cl, export=True)
+else:
+    create_model(cluster_iter, question_num, cluster_num, ml, cl)

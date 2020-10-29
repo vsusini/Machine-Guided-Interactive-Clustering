@@ -1,17 +1,28 @@
 .App {
-  margin: 2rem auto;
-  max-width: 800px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f7f6f6;
+  color: black;
+  height: 100vh;
 }
 
-.file-upload {
+html{
+  background-color: #f7f6f6;
+}
 
-  box-shadow: 2px 2px 2px 2px #ccc;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
+.lessImagePadding{
+  padding: 0.5rem !important;
+}
 
-  justify-content: space-between;
-  font-size: 1rem;
+.outerBorders{
+  background-color: white;
+  padding: 4%;
+  border-radius: 7.5%;
 }
 
 .error {
@@ -19,17 +30,23 @@
   font-weight: 100;
 }
 
-input,
-div,
-button {
-  margin-top: 2rem;
+/* For the landing page */
+.imgSection {
+  background: linear-gradient(to right, transparent 50%, #f7f6f6 50%), url('https://images.pexels.com/photos/731082/pexels-photo-731082.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940') no-repeat center;
+  background-size: cover;
 }
 
-.upbutton {
-  width: 5rem;
-  padding: .5rem;
-  background-color: #2767e9;
-  color: aliceblue;
-  font-size: 1rem;
-  cursor: pointer;
+/* For the landing page */
+/* Supports the Title in the center */
+.align-items-center {
+  display: flex;
+  align-items: center;
+  /*Aligns vertically center */
+  justify-content: center;
+  /*Aligns horizontally center */
+}
+
+.rowNoMargin {
+  display: flex !important;
+  flex-wrap: wrap !important;
 }
