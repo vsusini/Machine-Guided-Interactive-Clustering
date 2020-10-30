@@ -10,7 +10,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import { Card, Button } from 'react-bootstrap';
 
-import { MyTextInput } from "./textInput"
+import { MyTextInput, MyTextInputPercent } from "./textInput"
 
 class FileForm extends Component {
 
@@ -54,63 +54,71 @@ class FileForm extends Component {
                             }).catch(err => console.log(err.response))
                         }
                         return (
-                            <div>
-                                <div>
-                                    <Card>
-                                        <Card.Body>
-                                            <Card.Title>Input Your Information</Card.Title>
-                                            <Card.Text>
-                                                With supporting text below as a natural lead-in to additional content.
+                            <div className="outerBorders w-75">
+                                <Card className="border border-dark">
+                                    <Card.Body>
+                                        <Card.Title>Input Your Information</Card.Title>
+                                        <Card.Text>
+                                            With supporting text below as a natural lead-in to additional content.
                                             </Card.Text>
-                                            <div className="input-group">
-                                                <div className="custom-file">
-                                                    <input type="file" className="custom-file-input" ref={this.el} accept=".csv" onChange={handleChange} />
-                                                    <label className="custom-file-label">{this.fileName}</label>
-                                                </div>
+                                        <div className="input-group">
+                                            <div className="custom-file">
+                                                <input type="file" className="custom-file-input" ref={this.el} accept=".csv" onChange={handleChange} />
+                                                <label className="custom-file-label">{this.fileName}</label>
                                             </div>
+                                        </div>
 
-                                            <Formik
-                                                initialValues={new FormInput()}
-                                                validationSchema={Yup.object({
-                                                    questionsPerIteration: Yup.number().required(),
-                                                    numberOfClusters: Yup.number().required()
-                                                })}
-                                                onSubmit={async values => {
-                                                    const { history } = this.props
-                                                    history.push("/questions")
-                                                    uploadFile()
-                                                    context.testObj = values
-                                                    context.runPython(1, 10, 2)
-                                                    console.log("Submitting, moving to next page.")
-                                                }}
-                                            >
-                                                <Form>
-                                                    <Row>
-                                                        <Col>
-                                                            <MyTextInput
-                                                                label="Questions Per Iteration"
-                                                                name="questionsPerIteration"
-                                                                placeholder="">
-                                                            </MyTextInput>
-                                                        </Col>
-                                                    </Row>
-                                                    <Row>
-                                                        <Col>
-                                                            <MyTextInput
-                                                                label="Number of Clusters"
-                                                                name="numberOfClusters"
-                                                                placeholder="">
-                                                            </MyTextInput>
-                                                        </Col>
-                                                    </Row>
-                                                    <Button type="submit" className="upbutton">
-                                                        Submit Values
-                                                    </Button>
-                                                </Form>
-                                            </Formik>
-                                        </Card.Body>
-                                    </Card>
-                                </div>
+                                        <Formik
+                                            initialValues={new FormInput()}
+                                            validationSchema={Yup.object({
+                                                questionsPerIteration: Yup.number().typeError("Must be a number.").required("Need this value to determine questions I can ask you."),
+                                                numberOfClusters: Yup.number().typeError("Must be a number.").required("Need this value to know the cluster amount based on your dataset."),
+                                                maxConstraintPercent: Yup.number().typeError("Must be a number.").required("Need this so I can help you stop when you are ready.")
+                                            })}
+                                            onSubmit={async values => {
+                                                const { history } = this.props
+                                                history.push("/questions")
+                                                uploadFile()
+                                                context.testObj = values
+                                                context.runPython(1, 10, 2)
+                                                console.log("Submitting, moving to next page.")
+                                            }}
+                                        >
+                                            <Form>
+                                                <Row>
+                                                    <Col>
+                                                        <MyTextInput
+                                                            label="Questions Per Iteration"
+                                                            name="questionsPerIteration"
+                                                            placeholder="">
+                                                        </MyTextInput>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col>
+                                                        <MyTextInput
+                                                            label="Number of Clusters"
+                                                            name="numberOfClusters"
+                                                            placeholder="">
+                                                        </MyTextInput>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col>
+                                                        <MyTextInputPercent
+                                                            label="Max Constraint Percentage"
+                                                            name="maxConstraintPercent"
+                                                            placeholder="">
+                                                        </MyTextInputPercent>
+                                                    </Col>
+                                                </Row>
+                                                <Row className="align-middle align-items-center text-center">
+                                                    <Button type="submit" className="mt-3">Submit Values </Button>
+                                                </Row>
+                                            </Form>
+                                        </Formik>
+                                    </Card.Body>
+                                </Card>
                             </div>
                         );
                     }}

@@ -7,11 +7,11 @@ class Landing extends Component {
     render() {
         return (
             <section className="imgSection">
-                <div className="rowNoMargin">
+                <div className="rowNoMargin h-100">
                     <Col className="col-sm-6 align-middle align-items-center text-center">
-                        <h2>Interactive Constrained Clustering</h2>
+                        <h1>Interactive Constrained Clustering</h1>
                     </Col>
-                    <Col className="col-sm-6 p-5">
+                    <Col className="col-sm-6 align-middle align-items-center">
                         <FileUpload></FileUpload>
                     </Col>
                 </div>

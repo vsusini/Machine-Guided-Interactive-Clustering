@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 export class FormInput {
   questionsPerIteration = ""
   numberOfClusters = ""
+  maxConstraintPercent = ""
 }
 
 export const AppContext = React.createContext({

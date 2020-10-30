@@ -21,8 +21,8 @@ html{
 
 .outerBorders{
   background-color: white;
-  padding: 4%;
-  border-radius: 7.5%;
+  padding: 1.25rem;
+  border-radius: 25px;
 }
 
 .error {
@@ -34,6 +34,10 @@ html{
 .imgSection {
   background: linear-gradient(to right, transparent 50%, #f7f6f6 50%), url('https://images.pexels.com/photos/731082/pexels-photo-731082.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940') no-repeat center;
   background-size: cover;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
 }
 
 /* For the landing page */
@@ -41,9 +45,7 @@ html{
 .align-items-center {
   display: flex;
   align-items: center;
-  /*Aligns vertically center */
   justify-content: center;
-  /*Aligns horizontally center */
 }
 
 .rowNoMargin {

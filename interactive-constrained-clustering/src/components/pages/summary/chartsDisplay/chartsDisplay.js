@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col } from 'react-bootstrap'
+import { Col } from 'react-bootstrap'
 import { ChartSlot } from "./singleChartDisplay"
 
 class ChartsDisplay extends Component {
