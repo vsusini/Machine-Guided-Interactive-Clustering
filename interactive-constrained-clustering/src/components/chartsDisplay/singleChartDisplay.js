@@ -3,7 +3,7 @@ import {Card} from 'react-bootstrap'
 
 export const ChartSlot = (props) => {
     return (
-        <div className="outerBorders my-3 mx-5">
+        <div className="outerBorders">
             <Card className="bg-dark">
                 <Card.Img src={props.imgSrc} alt="Card image" />
                 <Card.ImgOverlay className="lessImagePadding">

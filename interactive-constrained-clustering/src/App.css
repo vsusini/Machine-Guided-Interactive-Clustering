@@ -16,13 +16,20 @@ html{
 }
 
 .lessImagePadding{
-  padding: 0.5rem !important;
+  padding: 0.25rem !important;
 }
 
 .outerBorders{
   background-color: white;
   padding: 1.25rem;
   border-radius: 25px;
+  margin-bottom: 1rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+
+.topOuterBorder{
+  margin-top: 1rem;
 }
 
 .error {
@@ -38,6 +45,11 @@ html{
   height: 100%;
   width: 100%;
   left: 0;
+}
+
+.modal-90w{
+  width: 90% !important;
+  max-width: 90% !important;
 }
 
 /* For the landing page */

@@ -24,7 +24,7 @@ class App extends Component {
     super(props);
     this.state = {
       dataArr: null,
-      iterationCount: 7,
+      iterationCount: 2, //default = 0
       testObj: "",
       saveData: this.saveData,
       runPython: this.runPython,

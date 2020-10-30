@@ -12,7 +12,7 @@ class ChartsDisplay extends Component {
         var imageArr = [];
         var smallerArray = []
         for (let index = 0; index < this.iterationCount; index++) {
-            smallerArray.push(require("../../../../images/clusterImg" + (index + 1) + ".png").default)
+            smallerArray.push(require("../../images/clusterImg" + (index + 1) + ".png").default)
             if (smallerArray.length === 3) {
                 imageArr.push(smallerArray)
                 smallerArray = []
@@ -21,7 +21,7 @@ class ChartsDisplay extends Component {
         if (smallerArray.length) {
             imageArr.push(smallerArray)
         }
-        console.log("ImageArray", imageArr)
+        //console.log("ImageArray", imageArr)
         return imageArr
     }
 
@@ -45,9 +45,9 @@ class ChartsDisplay extends Component {
                                 )
                             })
                             }
-                        {realIndex % 3 === 1 ? <Col></Col> : null}
-                        {realIndex % 3 === 1 ? <Col></Col> : null}
-                        {realIndex % 3 === 2 ? <Col></Col> : null}
+                        {realIndex % 3 === 1 ? <Col className="my-3 mx-5"></Col> : null}
+                        {realIndex % 3 === 1 ? <Col className="my-3 mx-5"></Col> : null}
+                        {realIndex % 3 === 2 ? <Col className="my-3 mx-5"></Col> : null}
                         </div>
                     )
                 })}

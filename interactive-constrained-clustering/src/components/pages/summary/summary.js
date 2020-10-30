@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Link } from "react-router-dom";
-import ChartsDisplay from "./chartsDisplay/chartsDisplay"
-import {AppContext} from "../../../App"
+import ChartsDisplay from "../../chartsDisplay/chartsDisplay"
+import { AppContext } from "../../../App"
+import { Col, Button } from 'react-bootstrap';
 
 class Summary extends Component {
     render() {
@@ -11,9 +11,16 @@ class Summary extends Component {
                     {context => {
                         return (
                             <div>
-                                <h1>Summary</h1>
-                                <Link to="/questions"><button>Questions</button></Link>
-                                <ChartsDisplay iterationCount={context.iterationCount}></ChartsDisplay>
+                                <div className="outerBorders rowNoMargin topOuterBorder mx-5">
+                                    <h1>Summary</h1>
+                                    <Button>Refresh</Button>
+                                    <Button>Export Model</Button>
+                                </div>
+                                <div className="rowNoMargin">
+                                    <Col>
+                                        <ChartsDisplay iterationCount={context.iterationCount}></ChartsDisplay>
+                                    </Col>
+                                </div>
                             </div>
                         )
                     }}
