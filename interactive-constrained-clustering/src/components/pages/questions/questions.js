@@ -12,18 +12,18 @@ class Questions extends Component {
             <>
                 <AppContext.Consumer>
                     {context => (
-                        <div className="mx-5">
-                            <div className="outerBorders rowNoMargin topOuterBorder">
+                        <div className="mx-4">
+                            <div className="outerBorders rowNoMargin topOuterBorder imageViewOptions">
                                 <Col>
 
                                 </Col>
-                                <Col xs={6}>
+                                <Col xs={3}>
                                     <ChartSlot
                                         iteration={context.iterationCount}
                                         imgSrc={require("../../../images/clusterImg" + context.iterationCount + ".png").default}>
                                     </ChartSlot>
                                 </Col>
-                                <Col className="">
+                                <Col>
                                     <Row>
                                         Options
                                     </Row>
@@ -36,7 +36,7 @@ class Questions extends Component {
                                     </Row>
                                 </Col>
                             </div>
-                            <div className="rowNoMargin">
+                            <div className="rowNoMargin tableViewOptions">
                                 <Col className="outerBorders">
                                     {/* <TableDisplay dataArr={context.dataArr} set={context.output.quesiton_set}></TableDisplay> */}
                                     <TableDisplay dataArr={context.dataArr} set={[1,2,3,4]}></TableDisplay>

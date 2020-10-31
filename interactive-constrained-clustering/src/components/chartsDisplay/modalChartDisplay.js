@@ -26,7 +26,7 @@ export function ModalChartDisplay() {
                 keyboard={false}
               >
                 <Modal.Header closeButton>
-                  <Modal.Title>Current Iteration Images</Modal.Title>
+                  <Modal.Title>Iteration Images</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                   <ChartsDisplay iterationCount={context.iterationCount}></ChartsDisplay>

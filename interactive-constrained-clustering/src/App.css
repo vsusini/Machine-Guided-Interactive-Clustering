@@ -38,6 +38,10 @@ html{
   margin-top: 0rem;
 }
 
+.modal-body {
+  background-color: #f7f6f6;
+}
+
 .error {
   color: red;
   font-weight: 100;
@@ -51,6 +55,21 @@ html{
   height: 100%;
   width: 100%;
   left: 0;
+}
+
+.fullScreen{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+}
+
+.imageViewOptions{
+  max-height: 40%;
+}
+
+.lowerViewOptions{
+  max-height: 60%;
 }
 
 .modal-90w{

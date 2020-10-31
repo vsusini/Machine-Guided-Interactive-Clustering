@@ -34,20 +34,22 @@ class ChartsDisplay extends Component {
                     return (
                         <div className="rowNoMargin" key={index}>
                             {key.map((link) => {
-                                realIndex = realIndex +1
+                                realIndex = realIndex + 1
                                 return (
                                     <Col key={realIndex}>
-                                        <ChartSlot
-                                            iteration={realIndex}
-                                            imgSrc={link}>
-                                        </ChartSlot>
+                                        <div className="outerBorders">
+                                            <ChartSlot
+                                                iteration={realIndex}
+                                                imgSrc={link}>
+                                            </ChartSlot>
+                                        </div>
                                     </Col>
                                 )
                             })
                             }
-                        {realIndex % 3 === 1 ? <Col></Col> : null}
-                        {realIndex % 3 === 1 ? <Col></Col> : null}
-                        {realIndex % 3 === 2 ? <Col></Col> : null}
+                            {realIndex % 3 === 1 ? <Col></Col> : null}
+                            {realIndex % 3 === 1 ? <Col></Col> : null}
+                            {realIndex % 3 === 2 ? <Col></Col> : null}
                         </div>
                     )
                 })}
