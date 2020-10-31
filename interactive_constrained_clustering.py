@@ -12,9 +12,10 @@ from numpy import genfromtxt
 
 def create_model(clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
     # y is target = Goal of ML
-    data = datasets.load_breast_cancer(return_X_y=True)[0]
-    # data = genfromtxt('datasets/homes.csv', delimiter=',')
-    # print(data)
+    # How to use a dataset from sklearn
+    #data = datasets.load_breast_cancer(return_X_y=True)[0]
+    data = genfromtxt('datasets/homes.csv', delimiter=',')
+    data = np.delete(data, 0, 0) #Delete first row of the data. 
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
         # Generates the setup for constraints from input from the user.

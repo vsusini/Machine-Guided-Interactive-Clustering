@@ -38,8 +38,9 @@ class Questions extends Component {
                             </div>
                             <div className="rowNoMargin tableViewOptions">
                                 <Col className="outerBorders">
-                                    {/* <TableDisplay dataArr={context.dataArr} set={context.output.quesiton_set}></TableDisplay> */}
                                     <TableDisplay dataArr={context.dataArr} set={[1,2,3,4]}></TableDisplay>
+                                    {/* For when the loading is implemented */}
+                                    {/* <TableDisplay dataArr={context.dataArr} set={context.output.question_set}></TableDisplay> */}
                                 </Col>
                                 <Col className="">
                                     <Row className="outerBorders">
