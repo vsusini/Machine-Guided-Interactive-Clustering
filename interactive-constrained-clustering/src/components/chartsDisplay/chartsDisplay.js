@@ -45,9 +45,9 @@ class ChartsDisplay extends Component {
                                 )
                             })
                             }
-                        {realIndex % 3 === 1 ? <Col className="my-3 mx-5"></Col> : null}
-                        {realIndex % 3 === 1 ? <Col className="my-3 mx-5"></Col> : null}
-                        {realIndex % 3 === 2 ? <Col className="my-3 mx-5"></Col> : null}
+                        {realIndex % 3 === 1 ? <Col></Col> : null}
+                        {realIndex % 3 === 1 ? <Col></Col> : null}
+                        {realIndex % 3 === 2 ? <Col></Col> : null}
                         </div>
                     )
                 })}

@@ -4,6 +4,7 @@ import { Col, Row, Button } from 'react-bootstrap';
 import { ChartSlot } from '../../chartsDisplay/singleChartDisplay'
 import { AppContext } from "../../../App"
 import { ModalChartDisplay } from "../../chartsDisplay/modalChartDisplay"
+import TableDisplay from "./tableDisplay"
 
 class Questions extends Component {
     render() {
@@ -37,7 +38,8 @@ class Questions extends Component {
                             </div>
                             <div className="rowNoMargin">
                                 <Col className="outerBorders">
-
+                                    {/* <TableDisplay dataArr={context.dataArr} set={context.output.quesiton_set}></TableDisplay> */}
+                                    <TableDisplay dataArr={context.dataArr} set={[1,2,3,4]}></TableDisplay>
                                 </Col>
                                 <Col className="">
                                     <Row className="outerBorders">
@@ -49,7 +51,7 @@ class Questions extends Component {
                                             </Row>
                                             <Row>
                                                 <Col>
-                                                    <Button>Must-Link</Button>
+                                                    <Button onClick={() => TableDisplay.getInstance().increaseIndex()}>Must-Link</Button>
                                                 </Col>
                                                 <Col>
                                                     <Button>Unknown</Button>

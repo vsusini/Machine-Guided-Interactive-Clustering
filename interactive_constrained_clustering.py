@@ -8,17 +8,18 @@ from sklearn.neighbors import NearestNeighbors
 import pandas as pd
 from pandas.api.types import is_string_dtype
 from distython import HEOM
+from numpy import genfromtxt
 
 def create_model(clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
     # y is target = Goal of ML
-    data, y = datasets.load_breast_cancer(return_X_y=True)
+    data = datasets.load_breast_cancer(return_X_y=True)[0]
+    # data = genfromtxt('datasets/homes.csv', delimiter=',')
+    # print(data)
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
         # Generates the setup for constraints from input from the user.
         ml = create_constraint(must_link_constraints)
         cl = create_constraint(cant_link_constraints)
-        print("ML:", ml)
-        print("CL:", cl)
         # How to add to the constraints
         ml_con = []
         cl_con = []
@@ -26,7 +27,6 @@ def create_model(clustering_iter, question_num, cluster_num, must_link_constrain
         model = PCKMeans(n_clusters=cluster_num)
         model.fit(data, ml=ml_con, cl=cl_con)
     else:
-        print("Running first iteration")
         model = PCKMeans(n_clusters=cluster_num)
         model.fit(data)
 
@@ -88,15 +88,16 @@ def compute_questions(data, labels, clustering_iter, question_num):
 
     question_set_indices = []
     # Interested in question_num/2 unreliable data points as we will compare the nearest neighbour of same node and nearest neighbour of a diffrent node
-    for value in sorted_sil_arr[:int(question_num/2)]:
-        question_set_indices += np.where(sil_arr == value)
     # Converting the lowest indecies into an array of list(index,index) based on nearest sets of clusters.
-    # print(question_set_indices)
+    for value in sorted_sil_arr[:int(question_num/2)]:
+        question_set_indices += np.where(sil_arr == value) 
+    #Format for question_set: [valueQuestioned(VQ), VQSameNeighbor, VQ, VQDiffNeighbor, VQ2, VQ2SameNeighbor, VQ2, VQ2DiffNeighbor,...]
+    #This format is used to support the transfer into javascript.
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
-        question_set.append((value[0], neighbor.kneighbors(
-            data[value].reshape(1, -1), n_neighbors=2)[1][0, 1]))
+        question_set.append(value[0])
+        question_set.append(neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=2)[1][0, 1])
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
         found = True
         index = 2  # 0th element is itself, 1st element is assigned above.
@@ -104,10 +105,11 @@ def compute_questions(data, labels, clustering_iter, question_num):
             neighbor_index = neighbor.kneighbors(
                 data[value].reshape(1, -1), n_neighbors=(index+1))[1][0, index]
             if labels[neighbor_index] != labels[value[0]]:
-                question_set.append((value[0], neighbor_index))
+                question_set.append(value[0])
+                question_set.append(neighbor_index)
                 found = False
             index += 1
-    print("Question Set: ",question_set)
+    print(question_set)
     # Send the indecies for the bottom values to React.
 
 '''
@@ -144,7 +146,8 @@ try:
 except IndexError:
     export = False
 
-print(cluster_num)
+# print("test")
+# print("SEPERATOR")
 
 if bool(export):
     create_model(cluster_iter, question_num, cluster_num, ml, cl, export=True)

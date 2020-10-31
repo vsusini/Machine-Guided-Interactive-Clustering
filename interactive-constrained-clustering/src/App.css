@@ -30,6 +30,12 @@ html{
 
 .topOuterBorder{
   margin-top: 1rem;
+  margin-right: 0rem;
+}
+
+/* Used to support the table input. Bootstrap has a margin I dont need.  */
+.marginBottom0{
+  margin-top: 0rem;
 }
 
 .error {

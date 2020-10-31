@@ -10,10 +10,27 @@ export class FormInput {
   maxConstraintPercent = ""
 }
 
+class PythonOutput {
+  question_set = ""
+
+  constructor(question_set){
+    this.question_set = this.convertIncomingSet(question_set)
+  }
+
+  convertIncomingSet (set) {
+    var new_set = set.substring(1, set.length-1).split(",")
+    new_set.forEach((item, index, arr)=>{
+      arr[index] = parseInt(item.trim())
+    })
+    return new_set
+  }
+}
+
 export const AppContext = React.createContext({
   dataArr: null,
   iterationCount: null,
   testObj: FormInput,
+  output: PythonOutput,
   saveData: () => { },
   runPython: (iteration_num, question_num, cluster_num) => { },
 });
@@ -24,8 +41,9 @@ class App extends Component {
     super(props);
     this.state = {
       dataArr: null,
-      iterationCount: 2, //default = 0
+      iterationCount: 3, //default = 0
       testObj: "",
+      output: "",
       saveData: this.saveData,
       runPython: this.runPython,
     };
@@ -40,10 +58,11 @@ class App extends Component {
     formData.append('cluster_num', cluster_num)
     axios.post('http://localhost:4500/python', formData, {
     }).then(res => {
-      console.log(res);
-      console.log(res.data.name)
-      console.log("Done")
-    }).catch(err => console.log(err.response))
+      var outputsFromPython = res.data.name
+      //If no SEPERATOR, gives entire output. Else, will seperate the diff parts into an array. Can handle when necessary.
+      this.setState({output: new PythonOutput(outputsFromPython.split("SEPERATOR")[0].trim())})
+      console.log("Done Python")
+    }).catch(err => console.log(err))
   }
 
   saveData = (e) => {
