@@ -39,6 +39,10 @@ html{
   margin-top: 0rem;
 }
 
+.titleFontSize{
+  font-size: 270%;
+}
+
 .marginLeft0{
   margin-left: 0rem !important;
 }
@@ -58,12 +62,18 @@ html{
 
 /* For the landing page */
 .imgSection {
-  background: linear-gradient(to right, transparent 50%, #f7f6f6 50%), url('https://images.pexels.com/photos/731082/pexels-photo-731082.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940') no-repeat center;
-  background-size: cover;
+  background: linear-gradient(to right, transparent 50%, #f7f6f6 50%), black no-repeat center;
+  border: black;
   position: absolute;
   height: 100%;
   width: 100%;
   left: 0;
+}
+
+.leftHalf {
+  background-size: contain;
+  background: url("./images/landingPage.png") no-repeat center;
+  position: absolute;
 }
 
 .fullScreen{

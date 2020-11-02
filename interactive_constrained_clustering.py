@@ -33,9 +33,9 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
 
     # Creation of graph for image.
     #plt.style.use('dark_background')
-    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdGy)
-    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter, dpi=200) for nicer image to get large file.
-    plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
+    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdBu) #plt.cm.RdGy nice red good for whtie plt.cm.BrBG nice green and brown
+    plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter, orientation='portrait') #dpi=100 for landing page pic
+    #plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
     if export:
         export_model(model)
