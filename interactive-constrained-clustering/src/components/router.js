@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import Landing from "./pages/landingPage/landing"
-import Questions from "./pages/questions/questions"
+import {Questions} from "./pages/questions/questions"
 import Summary from "./pages/summary/summary"
 
 export default function Router() {

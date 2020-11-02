@@ -31,11 +31,20 @@ html{
 .topOuterBorder{
   margin-top: 1rem;
   margin-right: 0rem;
+  margin-left: 0rem;
 }
 
 /* Used to support the table input. Bootstrap has a margin I dont need.  */
-.marginBottom0{
+.marginTop0{
   margin-top: 0rem;
+}
+
+.marginLeft0{
+  margin-left: 0rem !important;
+}
+
+.marginBottom0{
+  margin-bottom: 0rem !important;
 }
 
 .modal-body {
@@ -65,11 +74,11 @@ html{
 }
 
 .imageViewOptions{
-  max-height: 40%;
+  max-height: 40vh;
 }
 
 .lowerViewOptions{
-  max-height: 60%;
+  max-height: 60vh;
 }
 
 .modal-90w{

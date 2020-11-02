@@ -32,18 +32,22 @@ class TableDisplay extends Component {
     }
 
     getSample = (arr, set, sample_num, question) => {
-        return arr[set[question + sample_num]]
+        try {
+            return arr[set[question + sample_num]]
+        } catch (err){
+            return this.featuresArr
+        }
     }
 
     render() {
         return (
             <>
-                <Table striped bordered className="marginBottom0">
+                <Table striped bordered size="sm" className="marginBottom0">
                     <thead>
                         <tr>
                             <th>Features</th>
-                            <th>Sample {this.set[this.state.questionIndex]}</th>
-                            <th>Sample {this.set[this.state.questionIndex + 1]}</th>
+                            <th>Sample {this.set === undefined ? "" : this.set[this.state.questionIndex]}</th>
+                            <th>Sample {this.set === undefined ? "" : this.set[this.state.questionIndex + 1]}</th>
                         </tr>
                     </thead>
                     <tbody>

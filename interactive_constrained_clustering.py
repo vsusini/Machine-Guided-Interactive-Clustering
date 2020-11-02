@@ -10,11 +10,11 @@ from pandas.api.types import is_string_dtype
 from distython import HEOM
 from numpy import genfromtxt
 
-def create_model(clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
+def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
     # y is target = Goal of ML
     # How to use a dataset from sklearn
     #data = datasets.load_breast_cancer(return_X_y=True)[0]
-    data = genfromtxt('datasets/homes.csv', delimiter=',')
+    data = genfromtxt('datasets/'+filename, delimiter=',')
     data = np.delete(data, 0, 0) #Delete first row of the data. 
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
@@ -32,7 +32,9 @@ def create_model(clustering_iter, question_num, cluster_num, must_link_constrain
         model.fit(data)
 
     # Creation of graph for image.
-    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap='viridis')
+    #plt.style.use('dark_background')
+    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdGy)
+    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter, dpi=200) for nicer image to get large file.
     plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
     if export:
@@ -97,6 +99,7 @@ def compute_questions(data, labels, clustering_iter, question_num):
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
+        #TODO print("Need a test to determine if a set is in it or not. ")
         question_set.append(value[0])
         question_set.append(neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=2)[1][0, 1])
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
@@ -133,14 +136,15 @@ question_num - the input from the landing page will set the num of samples that 
 cluster_num - the number of clusters for the PCKmeans algorithm.
 '''
 # Handle incoming values from program call.
-cluster_iter = str(sys.argv[1])
-question_num = int(sys.argv[2])
-cluster_num = int(sys.argv[3])
+filename = str(sys.argv[1])
+cluster_iter = str(sys.argv[2])
+question_num = int(sys.argv[3])
+cluster_num = int(sys.argv[4])
 ml = [(0, 1), (2, 10), (0, 10), (30, 31)]
 cl = [(40, 41), (42, 41)]
 
 try:
-    if str(sys.argv[6]) == "export":
+    if str(sys.argv[7]) == "export":
         export = True
     else:
         export = False
@@ -151,6 +155,6 @@ except IndexError:
 # print("SEPERATOR")
 
 if bool(export):
-    create_model(cluster_iter, question_num, cluster_num, ml, cl, export=True)
+    create_model(filename, cluster_iter, question_num, cluster_num, ml, cl, export=True)
 else:
-    create_model(cluster_iter, question_num, cluster_num, ml, cl)
+    create_model(filename, cluster_iter, question_num, cluster_num, ml, cl)

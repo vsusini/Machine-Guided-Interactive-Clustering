@@ -76,12 +76,12 @@ class FileForm extends Component {
                                                 maxConstraintPercent: Yup.number().typeError("Must be a number.").required("Need this so I can help you stop when you are ready.")
                                             })}
                                             onSubmit={async values => {
-                                                context.runPython(1, 10, 2)
+                                                context.testObj = {filename: this.fileName, values}
+                                                context.trackPython(this.fileName, 1, 10, 2)
+                                                uploadFile()
+                                                console.log("Submitting, moving to next page.")
                                                 const { history } = this.props
                                                 history.push("/questions")
-                                                uploadFile()
-                                                context.testObj = values
-                                                console.log("Submitting, moving to next page.")
                                             }}
                                         >
                                             <Form>
