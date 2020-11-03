@@ -10,17 +10,22 @@ from pandas.api.types import is_string_dtype
 from distython import HEOM
 from numpy import genfromtxt
 
+
 def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
     # y is target = Goal of ML
     # How to use a dataset from sklearn
     #data = datasets.load_breast_cancer(return_X_y=True)[0]
+    #"TODO: Consider implementing more ways to handle data. Ex. Datasets without features in first row. ")
     data = genfromtxt('datasets/'+filename, delimiter=',')
-    data = np.delete(data, 0, 0) #Delete first row of the data. 
+    data = np.delete(data, 0, 0)  # Delete first row of the data.
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
+
+        ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
+        cl_converted = [i for i in zip(*[iter(cant_link_constraints)]*2)]
         # Generates the setup for constraints from input from the user.
-        ml = create_constraint(must_link_constraints)
-        cl = create_constraint(cant_link_constraints)
+        ml = create_constraint(ml_converted)
+        cl = create_constraint(cl_converted)
         # How to add to the constraints
         ml_con = []
         cl_con = []
@@ -32,23 +37,30 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
         model.fit(data)
 
     # Creation of graph for image.
-    #plt.style.use('dark_background')
-    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdBu) #plt.cm.RdGy nice red good for whtie plt.cm.BrBG nice green and brown
-    plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter, orientation='portrait') #dpi=100 for landing page pic
-    #plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
+    # plt.style.use('dark_background')
+    # plt.cm.RdGy nice red good for whtie plt.cm.BrBG nice green and brown
+    plt.scatter(data[:, 0], data[:, 1],
+                c=model.labels_, s=10, cmap=plt.cm.RdBu)
+    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" +
+                cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
+    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
     if export:
         export_model(model)
     else:
         compute_questions(data, model.labels_, clustering_iter, question_num)
 
+
 '''
 Takes a model 
 Exports using pickle format. 
 '''
+
+
 def export_model(model):
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('finalized_model.sav', 'wb'))
+
 
 '''
 Takes a list of (index, index) lists. 
@@ -60,6 +72,8 @@ Output: [(40, 41), (41, 40), (42, 41), (41, 42), (40, 42), (42, 40)]
 Input: [(40, 41), (42, 43)]
 Output: [(40, 41), (41, 40), (42, 43), (42, 43)]
 '''
+
+
 def create_constraint(links):
     final_link = []
     for link in links:
@@ -72,6 +86,7 @@ def create_constraint(links):
                 final_link.append((link[0], link2[1]))
                 final_link.append((link2[1], link[0]))
     return final_link
+
 
 def compute_questions(data, labels, clustering_iter, question_num):
     categorical_ix = gather_data_information(data)
@@ -93,15 +108,16 @@ def compute_questions(data, labels, clustering_iter, question_num):
     # Interested in question_num/2 unreliable data points as we will compare the nearest neighbour of same node and nearest neighbour of a diffrent node
     # Converting the lowest indecies into an array of list(index,index) based on nearest sets of clusters.
     for value in sorted_sil_arr[:int(question_num/2)]:
-        question_set_indices += np.where(sil_arr == value) 
-    #Format for question_set: [valueQuestioned(VQ), VQSameNeighbor, VQ, VQDiffNeighbor, VQ2, VQ2SameNeighbor, VQ2, VQ2DiffNeighbor,...]
-    #This format is used to support the transfer into javascript.
+        question_set_indices += np.where(sil_arr == value)
+    # Format for question_set: [valueQuestioned(VQ), VQSameNeighbor, VQ, VQDiffNeighbor, VQ2, VQ2SameNeighbor, VQ2, VQ2DiffNeighbor,...]
+    # This format is used to support the transfer into javascript.
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
-        #TODO print("Need a test to determine if a set is in it or not. ")
+        #"TODO: Need a test to determine if a set is in it or not. "
         question_set.append(value[0])
-        question_set.append(neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=2)[1][0, 1])
+        question_set.append(neighbor.kneighbors(
+            data[value].reshape(1, -1), n_neighbors=2)[1][0, 1])
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
         found = True
         index = 2  # 0th element is itself, 1st element is assigned above.
@@ -116,10 +132,13 @@ def compute_questions(data, labels, clustering_iter, question_num):
     print(question_set)
     # Send the indecies for the bottom values to React.
 
+
 '''
 Takes a dataset
 Exports a list full of columns indices that are not numerical from the dataset.
 '''
+
+
 def gather_data_information(data):
     df = pd.DataFrame(data=data)
     category_columns = []
@@ -129,6 +148,7 @@ def gather_data_information(data):
             category_columns.append(i)
     #print("Category Columns:", category_columns)
     return category_columns
+
 
 '''
 clustering_iter - to support the naming of the clustering in images.
@@ -140,8 +160,9 @@ filename = str(sys.argv[1])
 cluster_iter = str(sys.argv[2])
 question_num = int(sys.argv[3])
 cluster_num = int(sys.argv[4])
-ml = [(0, 1), (2, 10), (0, 10), (30, 31)]
-cl = [(40, 41), (42, 41)]
+
+ml = [1,2,3,4,5,6]
+cl = [1,2,3,4,5,6]
 
 try:
     if str(sys.argv[7]) == "export":
@@ -151,10 +172,11 @@ try:
 except IndexError:
     export = False
 
-# print("test")
+# Use for Spacing when passing back variables to Javascript
 # print("SEPERATOR")
 
 if bool(export):
-    create_model(filename, cluster_iter, question_num, cluster_num, ml, cl, export=True)
+    create_model(filename, cluster_iter, question_num,
+                 cluster_num, ml, cl, export=True)
 else:
     create_model(filename, cluster_iter, question_num, cluster_num, ml, cl)

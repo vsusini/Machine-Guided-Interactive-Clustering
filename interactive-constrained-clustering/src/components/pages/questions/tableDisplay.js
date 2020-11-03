@@ -34,7 +34,7 @@ class TableDisplay extends Component {
     getSample = (arr, set, sample_num, question) => {
         try {
             return arr[set[question + sample_num]]
-        } catch (err){
+        } catch (err) {
             return this.featuresArr
         }
     }

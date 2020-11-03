@@ -12,6 +12,7 @@ export class FormInput {
   questionsPerIteration = ""
   numberOfClusters = ""
   maxConstraintPercent = ""
+
 }
 
 class PythonOutput {
@@ -33,10 +34,11 @@ class PythonOutput {
 export const AppContext = React.createContext({
   dataArr: null,
   iterationCount: null,
-  testObj: FormInput,
+  formInput: null,
   output: PythonOutput,
   saveData: () => { },
-  trackPython: (iteration_num, question_num, cluster_num) => { },
+  trackPython: () => { },
+  saveForm: () => { }
 });
 
 class App extends Component {
@@ -46,35 +48,37 @@ class App extends Component {
     this.state = {
       dataArr: null,
       iterationCount: 5, //default = 0
-      testObj: "",
+      formInput: null,
       output: "",
       saveData: this.saveData,
       trackPython: this.trackPython,
+      saveForm: this.saveForm
     };
   }
 
-  trackPython = (filename, iteration_num, question_num, cluster_num) => {
+  trackPython = () => {
     trackPromise(
-      this.runPython(filename, iteration_num, question_num, cluster_num)
+      this.runPython()
     )
   }
 
-  runPython = (filename, iteration_num, question_num, cluster_num) => {
+  runPython = () => {
     const promise = new Promise((resolve, reject) => {
       this.setState({ iterationCount: this.state.iterationCount + 1 })
       const formData = new FormData();
-      formData.append('filename', filename)
-      formData.append('interation_num', iteration_num);
-      formData.append('question_num', question_num)
-      formData.append('cluster_num', cluster_num)
-      console.log("Need Loading Symbol to Display Loading while the python finishes")
+      formData.append('filename', this.state.formInput.filename)
+      // formData.append('interation_num', this.state.iterationCount);
+      // formData.append('question_num', this.state.formInput.numberOfClusters)
+      // formData.append('cluster_num', this.state.formInput.cluster_num)
+      formData.append('interation_num', 2);
+      formData.append('question_num', 10)
+      formData.append('cluster_num', 2)
       resolve(
         axios.post('http://localhost:4500/python', formData, {
         }).then(res => {
           var outputsFromPython = res.data.name
           //If no SEPERATOR, gives entire output. Else, will seperate the diff parts into an array. Can handle when necessary.
           this.setState({ output: new PythonOutput(outputsFromPython.split("SEPERATOR")[0].trim()) })
-          console.log("Done Python")
         }).catch(err => console.log(err))
       )
     });
@@ -84,6 +88,10 @@ class App extends Component {
   saveData = (e) => {
     console.log(e)
     this.setState({ dataArr: e })
+  }
+
+  saveForm = (e) => {
+    this.setState({ formInput: e })
   }
 
   render() {

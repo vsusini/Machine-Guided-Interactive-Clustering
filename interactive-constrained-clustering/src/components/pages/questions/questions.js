@@ -5,6 +5,7 @@ import { ChartSlot } from '../../chartsDisplay/singleChartDisplay'
 import { AppContext } from "../../../App"
 import { ModalChartDisplay } from "../../chartsDisplay/modalChartDisplay"
 import TableDisplay from "./tableDisplay"
+import ButtonsComponent from "./buttonsComp"
 import { usePromiseTracker } from 'react-promise-tracker';
 import Loader from 'react-promise-loader';
 
@@ -51,25 +52,7 @@ export const Questions = (props) => {
                                     </Col>
                                     <Col className="">
                                         <Row className="outerBorders">
-                                            <Col>
-                                                <Row>
-                                                    <Col>
-                                                        Questions
-                                                </Col>
-                                                </Row>
-                                                <Row>
-                                                    <Col>
-                                                        <Button onClick={() => TableDisplay.getInstance().increaseIndex()}>Must-Link</Button>
-                                                    </Col>
-                                                    <Col>
-                                                        <Button>Unknown</Button>
-                                                    </Col>
-                                                    <Col>
-                                                        <Button>Cannot-Link</Button>
-                                                    </Col>
-                                                    <Button onClick={() => context.trackPython(2, 10, 2)}>Run Python</Button>
-                                                </Row>
-                                            </Col>
+                                            <ButtonsComponent set={context.output.question_set} python={context.trackPython} totalQuestion={context.formInput.questionsPerIteration}></ButtonsComponent>
                                         </Row>
                                         <Row className="outerBorders">
 
