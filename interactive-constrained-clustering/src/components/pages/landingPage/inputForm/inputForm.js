@@ -78,7 +78,7 @@ class FileForm extends Component {
                                             onSubmit={async values => {
                                                 values.filename = this.fileName
                                                 context.saveForm(values)
-                                                context.trackPython()
+                                                context.trackPython([],[])
                                                 uploadFile()
                                                 const { history } = this.props
                                                 history.push("/questions")

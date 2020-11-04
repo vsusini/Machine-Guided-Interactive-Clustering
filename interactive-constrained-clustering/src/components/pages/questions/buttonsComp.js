@@ -31,7 +31,6 @@ class ButtonsComponent extends Component {
         this.mlArr.push(this.set[this.index])
         this.mlArr.push(this.set[this.index+1])
         this.handleClick()
-        console.log("Must Link Arr",this.mlArr)
     }
 
     handleCantLink = () => {
@@ -50,6 +49,12 @@ class ButtonsComponent extends Component {
 
     handleClick = () => {
         this.increaseQuestion()
+        console.log(this.state.questionNum)
+        console.log(this.totalQuestion)
+        if (this.state.questionNum === parseInt(this.totalQuestion)){
+            console.log("made it")
+            this.trackPython(this.mlArr, this.clArr)
+        }
         TableDisplay.getInstance().increaseIndex()
     }
 
@@ -75,7 +80,6 @@ class ButtonsComponent extends Component {
                         <Col>
                             <Button onClick={this.handleCantLink}>Cannot-Link</Button>
                         </Col>
-                        <Button onClick={() => this.trackPython(2, 10, 2)}>Run Python</Button>
                     </Row>
                 </Col>
             </>

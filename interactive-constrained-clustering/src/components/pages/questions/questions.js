@@ -11,10 +11,16 @@ import Loader from 'react-promise-loader';
 
 export const Questions = (props) => {
     const { promiseInProgress } = usePromiseTracker()
+    function handleImagePassing (count) {
+        try{
+            return require("../../../images/clusterImg" + count + ".png").default
+        } catch (error) {
+            console.log("Image Error")
+        }
+    } 
     return (
         <>
             {
-                // console.log("Promse"+promiseInProgress)
                 (promiseInProgress === true) ?
                     <Loader promiseTracker={usePromiseTracker} />
                     :
@@ -28,7 +34,8 @@ export const Questions = (props) => {
                                     <Col xs={3}>
                                         <ChartSlot
                                             iteration={context.iterationCount}
-                                            imgSrc={require("../../../images/clusterImg" + context.iterationCount + ".png").default}>
+                                            // imgSrc={"../../images/clusterImg" + context.iterationCount + ".png"}>
+                                            imgSrc={handleImagePassing(context.iterationCount)}>
                                         </ChartSlot>
                                     </Col>
                                     <Col>

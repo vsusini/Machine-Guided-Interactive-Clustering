@@ -10,7 +10,6 @@ from pandas.api.types import is_string_dtype
 from distython import HEOM
 from numpy import genfromtxt
 
-
 def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
     # y is target = Goal of ML
     # How to use a dataset from sklearn
@@ -20,7 +19,6 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
     data = np.delete(data, 0, 0)  # Delete first row of the data.
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
-
         ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
         cl_converted = [i for i in zip(*[iter(cant_link_constraints)]*2)]
         # Generates the setup for constraints from input from the user.
@@ -55,8 +53,6 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
 Takes a model 
 Exports using pickle format. 
 '''
-
-
 def export_model(model):
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('finalized_model.sav', 'wb'))
@@ -72,19 +68,17 @@ Output: [(40, 41), (41, 40), (42, 41), (41, 42), (40, 42), (42, 40)]
 Input: [(40, 41), (42, 43)]
 Output: [(40, 41), (41, 40), (42, 43), (42, 43)]
 '''
-
-
 def create_constraint(links):
     final_link = []
     for link in links:
-        final_link.append((link[0], link[1]))
-        final_link.append((link[1], link[0]))
+        final_link.append((int(link[0]), int(link[1])))
+        final_link.append((int(link[1]), int(link[0])))
     links_new = final_link.copy()
     for link in links_new:
         for link2 in links_new:
             if link != link2 and link[1] == link2[0] and link[0] != link2[1] and (link[0], link2[1]) not in final_link:
-                final_link.append((link[0], link2[1]))
-                final_link.append((link2[1], link[0]))
+                final_link.append((int(link[0]), int(link2[1])))
+                final_link.append((int(link2[1]), int(link[0])))
     return final_link
 
 
@@ -114,31 +108,49 @@ def compute_questions(data, labels, clustering_iter, question_num):
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
-        #"TODO: Need a test to determine if a set is in it or not. "
-        question_set.append(value[0])
-        question_set.append(neighbor.kneighbors(
-            data[value].reshape(1, -1), n_neighbors=2)[1][0, 1])
+        found = False
+        index = 1
+        while not found:
+            v2 = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=index+1)[1][0, index]
+            found = search_in_question_set(question_set, value[0], v2)
+            if found:
+                question_set.append(value[0])
+                question_set.append(v2)
+                found = True
+            index+=1
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
-        found = True
+        found = False
         index = 2  # 0th element is itself, 1st element is assigned above.
-        while found:
+        while not found:
             neighbor_index = neighbor.kneighbors(
                 data[value].reshape(1, -1), n_neighbors=(index+1))[1][0, index]
             if labels[neighbor_index] != labels[value[0]]:
-                question_set.append(value[0])
-                question_set.append(neighbor_index)
-                found = False
+                found = search_in_question_set(question_set, value[0], neighbor_index)
+                if found:
+                    question_set.append(value[0])
+                    question_set.append(neighbor_index)
+                    found = True
             index += 1
     print(question_set)
     # Send the indecies for the bottom values to React.
+
+'''
+Supports in question_set calculation. 
+Checks if two samples are already inputed to the question set or not. 
+'''
+def search_in_question_set(set, v1 ,v2):
+    for i in range(len(set)-1):
+        if set[i] == v1 and set[i+1] == v2:
+            return False
+        if set[i] == v2 and set[i+1] == v1:
+            return False
+    return True
 
 
 '''
 Takes a dataset
 Exports a list full of columns indices that are not numerical from the dataset.
 '''
-
-
 def gather_data_information(data):
     df = pd.DataFrame(data=data)
     category_columns = []
@@ -148,7 +160,6 @@ def gather_data_information(data):
             category_columns.append(i)
     #print("Category Columns:", category_columns)
     return category_columns
-
 
 '''
 clustering_iter - to support the naming of the clustering in images.
@@ -160,9 +171,12 @@ filename = str(sys.argv[1])
 cluster_iter = str(sys.argv[2])
 question_num = int(sys.argv[3])
 cluster_num = int(sys.argv[4])
+ml = sys.argv[5].split(",")
+cl = sys.argv[6].split(",")
 
-ml = [1,2,3,4,5,6]
-cl = [1,2,3,4,5,6]
+# FOr testing purposes
+# ml = [1,2,3,4,5,6]
+# cl = [1,2,3,4,5,6]
 
 try:
     if str(sys.argv[7]) == "export":

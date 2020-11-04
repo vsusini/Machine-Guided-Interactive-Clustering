@@ -47,7 +47,7 @@ class App extends Component {
     super(props);
     this.state = {
       dataArr: null,
-      iterationCount: 5, //default = 0
+      iterationCount: 0, //default = 0
       formInput: null,
       output: "",
       saveData: this.saveData,
@@ -56,23 +56,25 @@ class App extends Component {
     };
   }
 
-  trackPython = () => {
+  trackPython = (ml,cl) => {
     trackPromise(
-      this.runPython()
+      this.runPython(ml,cl)
     )
   }
 
-  runPython = () => {
+  runPython = (ml,cl) => {
     const promise = new Promise((resolve, reject) => {
       this.setState({ iterationCount: this.state.iterationCount + 1 })
       const formData = new FormData();
       formData.append('filename', this.state.formInput.filename)
-      // formData.append('interation_num', this.state.iterationCount);
+      formData.append('interation_num', this.state.iterationCount);
       // formData.append('question_num', this.state.formInput.numberOfClusters)
       // formData.append('cluster_num', this.state.formInput.cluster_num)
-      formData.append('interation_num', 2);
       formData.append('question_num', 10)
       formData.append('cluster_num', 2)
+      formData.append('ml', ml)
+      formData.append('cl', cl)
+      console.log(formData)
       resolve(
         axios.post('http://localhost:4500/python', formData, {
         }).then(res => {
