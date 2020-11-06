@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Col, Row, ProgressBar } from 'react-bootstrap';
-import { StatNumber, StatNumberPercent } from "./individualStatNumber"
+import { StatNumber } from "./individualStatNumber"
 
 class SquareStatDisplay extends Component {
 
@@ -47,18 +47,15 @@ class SquareStatDisplay extends Component {
                     </Row>
                     <Row>
                         <Col className="text-center mt-3">
-                            Completion
+                            Constraint Percentage
                             <Row>
-                                <Col xs={2} className="text-center ml-2">
-                                    <StatNumberPercent number={this.state.stats.constrainedPercent} name="Constrained Percent"></StatNumberPercent>
-                                </Col>
                                 <Col>
                                     <Row>
-                                        <Col className="my-2">
-                                            <ProgressBar striped animated variant="primary" now={this.state.stats.constrainedPercent} />
+                                        <Col className="my-3">
+                                            <ProgressBar striped animated variant="primary" label={`${this.state.stats.constrainedPercent}%`} now={this.state.stats.constrainedPercent} />
                                         </Col>
                                     </Row>
-                                    <Row>
+                                    <Row className="ml-5">
                                         <Col xs={5}>
                                             <Row>
                                                 <Col>
@@ -70,8 +67,6 @@ class SquareStatDisplay extends Component {
                                                     <span className="individTitleForStats">Max Constraint Percent</span>
                                                 </Col>
                                             </Row>
-                                        </Col>
-                                        <Col>
                                         </Col>
                                         <Col xs={5}>
                                             <Row>
