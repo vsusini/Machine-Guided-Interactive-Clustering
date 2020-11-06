@@ -8,6 +8,7 @@ import TableDisplay from "./tableDisplay"
 import ButtonsComponent from "./buttonsComp"
 import { usePromiseTracker } from 'react-promise-tracker';
 import Loader from 'react-promise-loader';
+import SquareStatDisplay from '../../statsDisplays/squareStatDisplay'
 
 export const Questions = (props) => {
     const { promiseInProgress } = usePromiseTracker()
@@ -24,13 +25,12 @@ export const Questions = (props) => {
                 (promiseInProgress === true) ?
                     <div>
                         <Loader promiseTracker={usePromiseTracker} />
-                        <span>I promise im trying</span>
                     </div>
                     :
                     <AppContext.Consumer>
                         {context => (
                             <div className="mx-4">
-                                <div className="outerBorders rowNoMargin topOuterBorder imageViewOptions">
+                                <div className="outerBorders rowNoMargin topOuterBorder">
                                     <Col>
 
                                     </Col>
@@ -46,14 +46,14 @@ export const Questions = (props) => {
 
                                             <Col>
                                             </Col>
-                                            <Col className="">
+                                            <Col className="text-center">
                                                 Options
-                                                <Row className="ml-auto">
+                                                <Row>
                                                     <Col>
-                                                        <Link to="/summary"><Button className="btn-block my-3" variant="danger">Finish</Button></Link>
+                                                        <Link className="fixLinkOverButtonHover" to="/summary"><Button className="btn-block mb-3 mt-2" variant="danger">Finish</Button></Link>
                                                     </Col>
                                                 </Row>
-                                                <Row className="ml-auto">
+                                                <Row>
                                                     <Col>
                                                         <ModalChartDisplay></ModalChartDisplay>
                                                     </Col>
@@ -61,15 +61,12 @@ export const Questions = (props) => {
                                             </Col>
                                         </Row>
                                         <Row>
-
-
                                         </Row>
                                         <Row>
-
                                         </Row>
                                     </Col>
                                 </div>
-                                <div className="rowNoMargin lowerViewOptions">
+                                <div className="rowNoMargin">
                                     <Col className="outerBorders marginLeft0">
                                         {/* <TableDisplay dataArr={context.dataArr} set={[1, 2, 3, 4]}></TableDisplay> */}
                                         {/* For when the loading is implemented */}
@@ -80,7 +77,7 @@ export const Questions = (props) => {
                                             <ButtonsComponent set={context.output.question_set} python={context.trackPython} totalQuestion={context.formInput.questionsPerIteration}></ButtonsComponent>
                                         </Row>
                                         <Row className="outerBorders">
-
+                                            <SquareStatDisplay stats={context.stats}></SquareStatDisplay>
                                         </Row>
                                     </Col>
                                 </div>

@@ -45,9 +45,9 @@ class TableDisplay extends Component {
                 <Table striped bordered size="sm" className="marginBottom0">
                     <thead>
                         <tr>
-                            <th>Features</th>
-                            <th>Sample {this.set === undefined ? "" : this.set[this.state.questionIndex]}</th>
-                            <th>Sample {this.set === undefined ? "" : this.set[this.state.questionIndex + 1]}</th>
+                            <th className="text-center">Features</th>
+                            <th className="text-center">Sample {this.set === undefined ? "" : this.set[this.state.questionIndex]}</th>
+                            <th className="text-center">Sample {this.set === undefined ? "" : this.set[this.state.questionIndex + 1]}</th>
                         </tr>
                     </thead>
                     <tbody>

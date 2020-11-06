@@ -34,6 +34,11 @@ html{
   margin-left: 0rem;
 }
 
+.fixLinkOverButtonHover{
+  color: white !important; 
+  text-decoration: none !important;
+}
+
 /* Used to support the table input. Bootstrap has a margin I dont need.  */
 .marginTop0{
   margin-top: 0rem;
@@ -55,9 +60,14 @@ html{
   background-color: #f7f6f6;
 }
 
+.lineForStats{
+  border-right: 1px solid gray;
+}
+
 .error {
   color: red;
   font-weight: 100;
+  font-size: 70%
 }
 
 /* For the landing page */
@@ -83,14 +93,6 @@ html{
   left: 0;
 }
 
-.imageViewOptions{
-  max-height: 40vh;
-}
-
-.lowerViewOptions{
-  max-height: 60vh;
-}
-
 .modal-90w{
   width: 90% !important;
   max-width: 90% !important;
@@ -107,4 +109,15 @@ html{
 .rowNoMargin {
   display: flex !important;
   flex-wrap: wrap !important;
+}
+
+.containerNoPadding{
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.individTitleForStats {
+  color: grey;
+  font-size: 70%
 }

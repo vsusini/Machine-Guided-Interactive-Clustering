@@ -6,7 +6,7 @@ export const ChartSlot = (props) => {
         <div>
             <Card className="bg-dark">
                 <Card.Img src={props.imgSrc} alt="Card image"/>
-                <Card.ImgOverlay className="lessImagePadding">
+                <Card.ImgOverlay className="lessImagePadding text-center">
                     <Card.Title>Iteration {props.iteration}</Card.Title>
                 </Card.ImgOverlay>
             </Card>

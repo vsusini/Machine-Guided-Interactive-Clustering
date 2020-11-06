@@ -50,7 +50,7 @@ class ButtonsComponent extends Component {
     handleClick = () => {
         this.increaseQuestion()
         if (this.state.questionNum === parseInt(this.totalQuestion)){
-            this.trackPython(this.mlArr, this.clArr)
+            this.trackPython(this.mlArr, this.clArr, this.unknown)
         }
         TableDisplay.getInstance().increaseIndex()
     }
@@ -63,7 +63,7 @@ class ButtonsComponent extends Component {
             <>
                 <Col>
                     <Row>
-                        <Col className="align-middle align-items-center text-center">
+                        <Col className="text-center">
                             Questions {this.state.questionNum}/{this.totalQuestion}
                         </Col>
                     </Row>
