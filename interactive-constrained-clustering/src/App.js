@@ -12,7 +12,8 @@ export class FormInput {
   questionsPerIteration = ""
   numberOfClusters = ""
   maxConstraintPercent = ""
-
+  ml = []
+  cl = []
 }
 
 class PythonOutput {
@@ -47,7 +48,7 @@ class App extends Component {
     super(props);
     this.state = {
       dataArr: null,
-      iterationCount: 0, //default = 0
+      iterationCount: 1, //default = 0
       formInput: null,
       output: "",
       saveData: this.saveData,
@@ -72,8 +73,17 @@ class App extends Component {
       // formData.append('cluster_num', this.state.formInput.cluster_num)
       formData.append('question_num', 10)
       formData.append('cluster_num', 2)
-      formData.append('ml', ml)
-      formData.append('cl', cl)
+      let totalML = this.state.formInput.ml.concat(ml)
+      let totalCL = this.state.formInput.cl.concat(cl)
+      formData.append('ml', totalML)
+      formData.append('cl', totalCL)
+      this.setState({
+        formInput: {
+          ...this.state.formInput,
+          ml: totalML,
+          cl: totalCL
+        }
+      });
       resolve(
         axios.post('http://localhost:4500/python', formData, {
         }).then(res => {

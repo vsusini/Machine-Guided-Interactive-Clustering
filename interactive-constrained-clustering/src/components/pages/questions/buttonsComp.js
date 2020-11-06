@@ -49,10 +49,7 @@ class ButtonsComponent extends Component {
 
     handleClick = () => {
         this.increaseQuestion()
-        console.log(this.state.questionNum)
-        console.log(this.totalQuestion)
         if (this.state.questionNum === parseInt(this.totalQuestion)){
-            console.log("made it")
             this.trackPython(this.mlArr, this.clArr)
         }
         TableDisplay.getInstance().increaseIndex()
