@@ -50,7 +50,7 @@ export const Questions = (props) => {
                                                 Options
                                                 <Row className="ml-auto">
                                                     <Col>
-                                                        <Link to="/summary"><Button className="btn-block my-1" variant="danger">Finish</Button></Link>
+                                                        <Link to="/summary"><Button className="btn-block my-3" variant="danger">Finish</Button></Link>
                                                     </Col>
                                                 </Row>
                                                 <Row className="ml-auto">

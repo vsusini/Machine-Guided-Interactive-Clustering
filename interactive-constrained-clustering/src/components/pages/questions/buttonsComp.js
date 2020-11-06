@@ -63,11 +63,11 @@ class ButtonsComponent extends Component {
             <>
                 <Col>
                     <Row>
-                        <Col>
-                            Questions {this.state.questionNum} / {this.totalQuestion}
+                        <Col className="align-middle align-items-center text-center">
+                            Questions {this.state.questionNum}/{this.totalQuestion}
                         </Col>
                     </Row>
-                    <Row>
+                    <Row className="align-middle align-items-center text-center mt-3">
                         <Col>
                             <Button onClick={this.handleMustLink}>Must-Link</Button>
                         </Col>
