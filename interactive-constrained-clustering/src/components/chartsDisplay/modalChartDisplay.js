@@ -14,8 +14,8 @@ export function ModalChartDisplay() {
         {
           context => (
             <>
-              <Button variant="primary" onClick={handleShow}>
-                Images
+              <Button variant="primary" className="btn-block" onClick={handleShow}>
+                View Images
               </Button>
 
               <Modal

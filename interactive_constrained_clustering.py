@@ -10,11 +10,12 @@ from pandas.api.types import is_string_dtype
 from distython import HEOM
 from numpy import genfromtxt
 
+
 def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
     # y is target = Goal of ML
     # How to use a dataset from sklearn
     #data = datasets.load_breast_cancer(return_X_y=True)[0]
-    #"TODO: Consider implementing more ways to handle data. Ex. Datasets without features in first row. ")
+    # "TODO: Consider implementing more ways to handle data. Ex. Datasets without features in first row. ")
     data = genfromtxt('datasets/'+filename, delimiter=',')
     data = np.delete(data, 0, 0)  # Delete first row of the data.
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
@@ -53,6 +54,8 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
 Takes a model 
 Exports using pickle format. 
 '''
+
+
 def export_model(model):
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('finalized_model.sav', 'wb'))
@@ -68,6 +71,8 @@ Output: [(40, 41), (41, 40), (42, 41), (41, 42), (40, 42), (42, 40)]
 Input: [(40, 41), (42, 43)]
 Output: [(40, 41), (41, 40), (42, 43), (42, 43)]
 '''
+
+
 def create_constraint(links):
     final_link = []
     for link in links:
@@ -110,35 +115,41 @@ def compute_questions(data, labels, clustering_iter, question_num):
         # Sets the even value of the array to the nearest neighbour.
         found = False
         index = 1
+        closest_neighbor_index = neighbor.kneighbors(
+            data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
         while not found:
-            v2 = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=index+1)[1][0, index]
-            found = search_in_question_set(question_set, value[0], v2)
+            found = search_in_question_set(
+                question_set, value[0], closest_neighbor_index[index])
             if found:
                 question_set.append(value[0])
-                question_set.append(v2)
+                question_set.append(closest_neighbor_index[index])
                 found = True
-            index+=1
+            index += 1
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
         found = False
         index = 2  # 0th element is itself, 1st element is assigned above.
+        closest_neighbor_index = neighbor.kneighbors(
+            data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
         while not found:
-            neighbor_index = neighbor.kneighbors(
-                data[value].reshape(1, -1), n_neighbors=(index+1))[1][0, index]
-            if labels[neighbor_index] != labels[value[0]]:
-                found = search_in_question_set(question_set, value[0], neighbor_index)
+            if labels[closest_neighbor_index[index]] != labels[value[0]]:
+                found = search_in_question_set(
+                    question_set, value[0], closest_neighbor_index[index])
                 if found:
                     question_set.append(value[0])
-                    question_set.append(neighbor_index)
+                    question_set.append(closest_neighbor_index[index])
                     found = True
             index += 1
     print(question_set)
     # Send the indecies for the bottom values to React.
 
+
 '''
 Supports in question_set calculation. 
 Checks if two samples are already inputed to the question set or not. 
 '''
-def search_in_question_set(set, v1 ,v2):
+
+
+def search_in_question_set(set, v1, v2):
     for i in range(len(set)-1):
         if set[i] == v1 and set[i+1] == v2:
             return False
@@ -151,6 +162,8 @@ def search_in_question_set(set, v1 ,v2):
 Takes a dataset
 Exports a list full of columns indices that are not numerical from the dataset.
 '''
+
+
 def gather_data_information(data):
     df = pd.DataFrame(data=data)
     category_columns = []
@@ -160,6 +173,7 @@ def gather_data_information(data):
             category_columns.append(i)
     #print("Category Columns:", category_columns)
     return category_columns
+
 
 '''
 clustering_iter - to support the naming of the clustering in images.

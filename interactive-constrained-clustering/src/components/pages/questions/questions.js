@@ -11,18 +11,21 @@ import Loader from 'react-promise-loader';
 
 export const Questions = (props) => {
     const { promiseInProgress } = usePromiseTracker()
-    function handleImagePassing (count) {
-        try{
+    function handleImagePassing(count) {
+        try {
             return require("../../../images/clusterImg" + count + ".png").default
         } catch (error) {
             console.log("Image Error")
         }
-    } 
+    }
     return (
         <>
             {
                 (promiseInProgress === true) ?
-                    <Loader promiseTracker={usePromiseTracker} />
+                    <div>
+                        <Loader promiseTracker={usePromiseTracker} />
+                        <span>I promise im trying</span>
+                    </div>
                     :
                     <AppContext.Consumer>
                         {context => (
@@ -40,14 +43,29 @@ export const Questions = (props) => {
                                     </Col>
                                     <Col>
                                         <Row>
-                                            Options
-                                    </Row>
-                                        <Row>
 
-                                            <Link to="/summary"><Button variant="danger">Finish</Button></Link>
+                                            <Col>
+                                            </Col>
+                                            <Col className="">
+                                                Options
+                                                <Row className="ml-auto">
+                                                    <Col>
+                                                        <Link to="/summary"><Button className="btn-block my-1" variant="danger">Finish</Button></Link>
+                                                    </Col>
+                                                </Row>
+                                                <Row className="ml-auto">
+                                                    <Col>
+                                                        <ModalChartDisplay></ModalChartDisplay>
+                                                    </Col>
+                                                </Row>
+                                            </Col>
                                         </Row>
                                         <Row>
-                                            <ModalChartDisplay></ModalChartDisplay>
+
+
+                                        </Row>
+                                        <Row>
+
                                         </Row>
                                     </Col>
                                 </div>

@@ -74,14 +74,16 @@ class App extends Component {
       formData.append('cluster_num', 2)
       formData.append('ml', ml)
       formData.append('cl', cl)
-      console.log(formData)
       resolve(
         axios.post('http://localhost:4500/python', formData, {
         }).then(res => {
           var outputsFromPython = res.data.name
           //If no SEPERATOR, gives entire output. Else, will seperate the diff parts into an array. Can handle when necessary.
           this.setState({ output: new PythonOutput(outputsFromPython.split("SEPERATOR")[0].trim()) })
-        }).catch(err => console.log(err))
+        }).catch(err => {
+          console.log(err)
+          alert("An error has occured, sorry please restart. Maybe with a different dataset?")
+        })
       )
     });
     return promise;
