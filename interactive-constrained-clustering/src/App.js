@@ -33,16 +33,7 @@ class Stats {
     this.maxConstraint = maxConstraint
     this.possibleConstraints = samples * samples
     this.totalConstraints = (clSize + mlSize + unknownSize)
-    this.constrainedPercent = this.getConstrainedPercent(this.totalConstraints, this.possibleConstraints, this.maxConstraint)
-  }
-
-  getConstrainedPercent(totalConstraints, possibleConstraints, maxConstraint) {
-    let maxCDec = (maxConstraint/100)
-    console.log(maxCDec)
-    let constraintsAfterDec = possibleConstraints * maxCDec
-    console.log(constraintsAfterDec)
-    console.log(totalConstraints / constraintsAfterDec)
-    return Math.round((totalConstraints / (possibleConstraints * (maxConstraint/100))) * 100)  //Might be calculating this wrong
+    this.constrainedPercent = Math.round((this.totalConstraints / (this.possibleConstraints * (maxConstraint/100))) * 100)  //Might be calculating this wrong
   }
 }
 

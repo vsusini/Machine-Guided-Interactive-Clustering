@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import ChartsDisplay from "../../chartsDisplay/chartsDisplay"
 import { AppContext } from "../../../App"
-import { Col, Button } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
+import RecStatDisplay from "../../statsDisplays/recStatDisplay"
 
 class Summary extends Component {
     render() {
@@ -12,9 +13,7 @@ class Summary extends Component {
                         return (
                             <div>
                                 <div className="outerBorders rowNoMargin topOuterBorder mx-5">
-                                    <h1>Summary</h1>
-                                    <Button>Refresh</Button>
-                                    <Button>Export Model</Button>
+                                    <RecStatDisplay stats={context.stats}></RecStatDisplay>
                                 </div>
                                 <div className="rowNoMargin">
                                     <Col>

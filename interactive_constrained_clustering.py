@@ -58,7 +58,7 @@ Exports using pickle format.
 
 def export_model(model):
     #dump(obj, open(filename, mode))
-    pickle.dump(model, open('finalized_model.sav', 'wb'))
+    pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
 
 
 '''
