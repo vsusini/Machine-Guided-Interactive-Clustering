@@ -47,7 +47,7 @@ class SquareStatDisplay extends Component {
                     </Row>
                     <Row>
                         <Col className="text-center mt-3">
-                            Constraint Percentage
+                            Constrained Percentage
                             <Row>
                                 <Col>
                                     <Row>

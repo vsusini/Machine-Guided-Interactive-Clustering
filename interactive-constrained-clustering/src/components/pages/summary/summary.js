@@ -13,7 +13,7 @@ class Summary extends Component {
                         return (
                             <div>
                                 <div className="outerBorders rowNoMargin topOuterBorder mx-5">
-                                    <RecStatDisplay stats={context.stats}></RecStatDisplay>
+                                    <RecStatDisplay stats={context.stats} iterationCount={context.iterationCount}></RecStatDisplay>
                                 </div>
                                 <div className="rowNoMargin">
                                     <Col>

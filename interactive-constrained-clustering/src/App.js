@@ -70,7 +70,7 @@ class App extends Component {
     super(props);
     this.state = {
       dataArr: null,
-      iterationCount: 1, //default = 0
+      iterationCount: 2, //default = 0
       formInput: null,
       output: "",
       stats: "",

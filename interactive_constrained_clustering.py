@@ -11,7 +11,7 @@ from distython import HEOM
 from numpy import genfromtxt
 
 
-def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, export=False):
+def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints):
     # y is target = Goal of ML
     # How to use a dataset from sklearn
     #data = datasets.load_breast_cancer(return_X_y=True)[0]
@@ -44,22 +44,11 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
                 cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
     # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
-    if export:
-        export_model(model)
-    else:
-        compute_questions(data, model.labels_, clustering_iter, question_num)
-
-
-'''
-Takes a model 
-Exports using pickle format. 
-'''
-
-
-def export_model(model):
+    #Save model.
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
 
+    compute_questions(data, model.labels_, clustering_iter, question_num)
 
 '''
 Takes a list of (index, index) lists. 
@@ -192,19 +181,7 @@ cl = sys.argv[6].split(",")
 # ml = [1,2,3,4,5,6]
 # cl = [1,2,3,4,5,6]
 
-try:
-    if str(sys.argv[7]) == "export":
-        export = True
-    else:
-        export = False
-except IndexError:
-    export = False
-
 # Use for Spacing when passing back variables to Javascript
 # print("SEPERATOR")
 
-if bool(export):
-    create_model(filename, cluster_iter, question_num,
-                 cluster_num, ml, cl, export=True)
-else:
-    create_model(filename, cluster_iter, question_num, cluster_num, ml, cl)
+create_model(filename, cluster_iter, question_num, cluster_num, ml, cl)

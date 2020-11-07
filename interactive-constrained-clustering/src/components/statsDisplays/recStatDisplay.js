@@ -1,14 +1,45 @@
 import React, { Component } from 'react';
 import { Col, Row, ProgressBar, Button } from 'react-bootstrap';
 import { StatNumber } from "./individualStatNumber"
+import * as JSZip from 'jszip';
+import * as JSZipUtils from 'jszip-utils'
+import { saveAs } from 'file-saver';
 
 class RecStatDisplay extends Component {
 
     constructor(props) {
         super(props)
+        this.iterationCount = props.iterationCount
         this.state = {
             stats: props.stats
         }
+    }
+
+    zipImagesFolderAndDownload = () => {
+        var zip = new JSZip();
+        var imageArr = []
+        for (let index = 0; index < this.iterationCount; index++) {
+            imageArr.push(require("../../images/clusterImg" + (index + 1) + ".png").default)
+        }
+        Promise.all(imageArr.map(function (url) {
+            return new Promise(function (resolve, reject) {
+                JSZipUtils.getBinaryContent(url, function (err, data) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        console.log(url)
+                        zip.file(url.split("/")[3], data);
+                        resolve();
+                    }
+                });
+            })
+        })).then(function () {
+            zip.generateAsync({
+                type: "blob"
+            }).then(function (content) {
+                saveAs(content, "images.zip")
+            });
+        })
     }
 
     render() {
@@ -17,7 +48,7 @@ class RecStatDisplay extends Component {
                 <div className="containerNoPadding">
                     <Row>
                         <Col className="text-center">
-                            Constraint Percentage
+                            Constrained Percentage
                             <Row>
                                 <Col>
                                     <Row>
@@ -95,12 +126,9 @@ class RecStatDisplay extends Component {
                             </Row>
                             <Row>
                                 <Col>
-
-                                <a className="fixLinkOverButtonHover" href={require("../../images/clusterImg1.png").default} download="images">
-                                        <Button className="btn-block mb-3 mt-2">
-                                            Download Images
-                                        </Button>
-                                    </a>
+                                    <Button className="btn-block mb-3 mt-2" onClick={this.zipImagesFolderAndDownload}>
+                                        Download Images
+                                    </Button>
                                 </Col>
                             </Row>
                         </Col>
