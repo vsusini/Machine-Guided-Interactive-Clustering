@@ -33,7 +33,7 @@ class Stats {
     this.maxConstraint = maxConstraint
     this.possibleConstraints = samples * samples
     this.totalConstraints = (clSize + mlSize + unknownSize)
-    this.constrainedPercent = Math.round((this.totalConstraints / (this.possibleConstraints * (maxConstraint/100))) * 100)  //Might be calculating this wrong
+    this.constrainedPercent = Math.round((this.totalConstraints / (this.possibleConstraints * (maxConstraint / 100))) * 100)  //Might be calculating this wrong
   }
 }
 
@@ -91,7 +91,7 @@ class App extends Component {
       this.setState({ iterationCount: this.state.iterationCount + 1 })
       const formData = new FormData();
       formData.append('filename', this.state.formInput.filename)
-      formData.append('interation_num', this.state.iterationCount);
+      formData.append('interation_num', this.state.iterationCount + 1);
       // formData.append('question_num', this.state.formInput.numberOfClusters)
       // formData.append('cluster_num', this.state.formInput.cluster_num)
       formData.append('question_num', 10)
