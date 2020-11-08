@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Papa from 'papaparse'
-import { AppContext, FormInput } from "../../../../App"
+import { AppContext } from "../../../../App"
+import { FormInput } from '../../../../Python'
 import { withRouter } from 'react-router-dom'
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
