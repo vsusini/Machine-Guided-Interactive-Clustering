@@ -49,36 +49,44 @@ class SquareStatDisplay extends Component {
                         <Col className="text-center mt-3">
                             Constrained Percentage
                             <Row>
-                                <Col>
+                                <Col className="my-3">
+                                    <ProgressBar striped animated variant="primary" label={`${this.state.stats.constrainedPercent}%`} now={this.state.stats.constrainedPercent} />
+                                </Col>
+                            </Row>
+                            <Row className="">
+                                <Col xs={4}>
                                     <Row>
-                                        <Col className="my-3">
-                                            <ProgressBar striped animated variant="primary" label={`${this.state.stats.constrainedPercent}%`} now={this.state.stats.constrainedPercent} />
+                                        <Col>
+                                            <span>{this.state.stats.maxConstraint}%</span>
                                         </Col>
                                     </Row>
-                                    <Row className="ml-5">
-                                        <Col xs={5}>
-                                            <Row>
-                                                <Col>
-                                                    <span>{this.state.stats.maxConstraint}%</span>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col>
-                                                    <span className="individTitleForStats">Max Constraint Percent</span>
-                                                </Col>
-                                            </Row>
+                                    <Row>
+                                        <Col>
+                                            <span className="individTitleForStats">Max Constraint Percent</span>
                                         </Col>
-                                        <Col xs={5}>
-                                            <Row>
-                                                <Col>
-                                                    <span>{this.state.stats.totalConstraints}/{this.state.stats.possibleConstraints}</span>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col>
-                                                    <span className="individTitleForStats">Constraints Possible Overall</span>
-                                                </Col>
-                                            </Row>
+                                    </Row>
+                                </Col>
+                                <Col xs={4}>
+                                    <Row>
+                                        <Col>
+                                            <span>{this.state.stats.totalConstraints}/{this.state.stats.possibleConstraints}</span>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col>
+                                            <span className="individTitleForStats">Total Constraints Possible</span>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                                <Col xs={4}>
+                                    <Row>
+                                        <Col>
+                                            <span>{this.state.stats.constraintsLeft}</span>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col>
+                                            <span className="individTitleForStats">Constraints Left</span>
                                         </Col>
                                     </Row>
                                 </Col>

@@ -56,8 +56,8 @@ class RecStatDisplay extends Component {
                                             <ProgressBar striped animated variant="primary" label={`${this.state.stats.constrainedPercent}%`} now={this.state.stats.constrainedPercent} />
                                         </Col>
                                     </Row>
-                                    <Row className="ml-5">
-                                        <Col xs={5}>
+                                    <Row className="">
+                                        <Col xs={4}>
                                             <Row>
                                                 <Col>
                                                     <span>{this.state.stats.maxConstraint}%</span>
@@ -69,7 +69,7 @@ class RecStatDisplay extends Component {
                                                 </Col>
                                             </Row>
                                         </Col>
-                                        <Col xs={5}>
+                                        <Col xs={4}>
                                             <Row>
                                                 <Col>
                                                     <span>{this.state.stats.totalConstraints}/{this.state.stats.possibleConstraints}</span>
@@ -77,7 +77,19 @@ class RecStatDisplay extends Component {
                                             </Row>
                                             <Row>
                                                 <Col>
-                                                    <span className="individTitleForStats">Constraints Possible Overall</span>
+                                                    <span className="individTitleForStats">Total Constraints Possible</span>
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                        <Col xs={4}>
+                                            <Row>
+                                                <Col>
+                                                    <span>{this.state.stats.constraintsLeft}</span>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col>
+                                                    <span className="individTitleForStats">Constraints Left</span>
                                                 </Col>
                                             </Row>
                                         </Col>
