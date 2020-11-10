@@ -31,16 +31,16 @@ class SquareStatDisplay extends Component {
                             </Row>
                         </Col>
                         <Col className="text-center">
-                            Title
+                            Silhouette
                             <Row>
                                 <Col xs={4}>
-                                    <StatNumber number={this.state.stats.clConstraintCount} name="Sihloutte Average"></StatNumber>
+                                    <StatNumber number={this.state.stats.silMin} name="Silhouette Minimum"></StatNumber>
                                 </Col>
                                 <Col xs={4}>
-                                    <StatNumber number={this.state.stats.clConstraintCount} name="Sihloutte Min"></StatNumber>
+                                    <StatNumber number={this.state.stats.silAvg} name="Silhouette Average"></StatNumber>
                                 </Col>
                                 <Col xs={4}>
-                                    <StatNumber number={this.state.stats.clConstraintCount} name="Sihloutte"></StatNumber>
+                                    <StatNumber number={this.state.stats.silMax} name="Silhouette Maximum"></StatNumber>
                                 </Col>
                             </Row>
                         </Col>

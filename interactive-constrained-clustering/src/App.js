@@ -23,7 +23,7 @@ class App extends Component {
     super(props);
     this.state = {
       dataArr: null,
-      iterationCount: 2, //default = 0
+      iterationCount: 0, //default = 0
       formInput: null,
       output: "",
       stats: "",
@@ -67,9 +67,11 @@ class App extends Component {
         }).then(res => {
           var outputsFromPython = res.data.name
           var formState = this.state.formInput
+          var outputArr = outputsFromPython.split("SEPERATOR")
+          console.log(outputArr)
           //If no SEPERATOR, gives entire output. Else, will seperate the diff parts into an array. Can handle when necessary.
-          this.setState({ output: new PythonOutput(outputsFromPython.split("SEPERATOR")[0].trim()) })
-          this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length) })
+          this.setState({ output: new PythonOutput(outputArr[3].trim()) })
+          this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
         }).catch(err => {
           console.log(err)
           alert("An error has occured, sorry please restart. Maybe with a different dataset?")

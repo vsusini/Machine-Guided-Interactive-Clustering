@@ -16,8 +16,11 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
     # How to use a dataset from sklearn
     #data = datasets.load_breast_cancer(return_X_y=True)[0]
     # "TODO: Consider implementing more ways to handle data. Ex. Datasets without features in first row. ")
-    data = genfromtxt('datasets/'+filename, delimiter=',')
-    data = np.delete(data, 0, 0)  # Delete first row of the data.
+    data = pd.read_csv('datasets/'+filename)
+    data = data.to_numpy()
+    # Working for directly to a numpy array. Can be done below. dtype=None to try and handle strings properly.
+    # data = genfromtxt('datasets/'+filename, delimiter=',')
+    # data = np.delete(data, 0, 0)  # Delete first row of the data for the titles.
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
         ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
@@ -44,11 +47,13 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
                 cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
     # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
-    #Save model.
+    # Save model.
     #dump(obj, open(filename, mode))
-    pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
+    pickle.dump(model, open(
+        'interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
 
     compute_questions(data, model.labels_, clustering_iter, question_num)
+
 
 '''
 Takes a list of (index, index) lists. 
@@ -91,6 +96,12 @@ def compute_questions(data, labels, clustering_iter, question_num):
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
     sil_arr = metrics.silhouette_samples(data, labels)
     sorted_sil_arr = sorted(sil_arr)
+    print(sorted_sil_arr[0])
+    print("SEPERATOR")
+    print(sum(sorted_sil_arr)/len(sorted_sil_arr))
+    print("SEPERATOR")
+    print(sorted_sil_arr[-1])
+    print("SEPERATOR")
 
     question_set_indices = []
     # Interested in question_num/2 unreliable data points as we will compare the nearest neighbour of same node and nearest neighbour of a diffrent node
@@ -165,9 +176,12 @@ def gather_data_information(data):
 
 
 '''
+filename - filename within datasets folder to search for. 
 clustering_iter - to support the naming of the clustering in images.
 question_num - the input from the landing page will set the num of samples that will be collected.
 cluster_num - the number of clusters for the PCKmeans algorithm.
+ml - The must link constraints from the oracle.
+cl - The can't link constraints from the oracle.
 '''
 # Handle incoming values from program call.
 filename = str(sys.argv[1])
@@ -180,8 +194,5 @@ cl = sys.argv[6].split(",")
 # FOr testing purposes
 # ml = [1,2,3,4,5,6]
 # cl = [1,2,3,4,5,6]
-
-# Use for Spacing when passing back variables to Javascript
-# print("SEPERATOR")
 
 create_model(filename, cluster_iter, question_num, cluster_num, ml, cl)

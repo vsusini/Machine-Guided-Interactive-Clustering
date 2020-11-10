@@ -9,12 +9,7 @@ export class FormInput {
 }
 
 export class Stats {
-    clConstraintCount = ""
-    mlConstraintCount = ""
-    unknownConstraintCount = ""
-    maxConstraint = ""
-    constrainedPercent = ""
-    constructor(clSize, mlSize, unknownSize, maxConstraint, totalSamples) {
+    constructor(clSize, mlSize, unknownSize, maxConstraint, totalSamples, silAvg, silMax, silMin) {
         const samples = totalSamples - 1 //Done cause the first row is a feature row. 
         //Constraint Count
         this.clConstraintCount = clSize
@@ -24,13 +19,15 @@ export class Stats {
         this.maxConstraint = maxConstraint
         this.possibleConstraints = samples * samples
         this.totalConstraints = (clSize + mlSize + unknownSize)
-        this.constrainedPercent = Math.round((this.totalConstraints / (this.possibleConstraints * (maxConstraint / 100))) * 100)  //Might be calculating this wrong
+        this.constrainedPercent = Math.round((this.totalConstraints / (this.possibleConstraints * (maxConstraint / 100))) * 100)
+        //Sihloutte Values 
+        this.silAvg = Math.round(silAvg * 1000)/1000
+        this.silMax = Math.round(silMax * 1000)/1000
+        this.silMin = Math.round(silMin * 1000)/1000
     }
 }
 
 export class PythonOutput {
-    question_set = ""
-
     constructor(question_set) {
         this.question_set = this.convertIncomingSet(question_set)
     }
