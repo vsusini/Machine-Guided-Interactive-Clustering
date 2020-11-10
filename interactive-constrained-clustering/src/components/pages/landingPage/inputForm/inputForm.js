@@ -49,7 +49,6 @@ class FileForm extends Component {
                             formData.append('file', this.file); // appending file
                             axios.post('http://localhost:4500/upload', formData, {
                             }).then(res => {
-                                console.log(res);
                                 this.name = res.data.name
                                 this.path = 'http://localhost:4500' + res.data.path
                             }).catch(err => console.log(err.response))
@@ -78,6 +77,7 @@ class FileForm extends Component {
                                             })}
                                             onSubmit={async values => {
                                                 values.filename = this.fileName
+                                                context.verifiedInput()
                                                 context.saveForm(values)
                                                 context.trackPython([],[], [])
                                                 uploadFile()

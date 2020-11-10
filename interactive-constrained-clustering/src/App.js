@@ -4,17 +4,21 @@ import axios from 'axios';
 import Router from './components/router'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { trackPromise } from 'react-promise-tracker';
-import {Stats, PythonOutput} from './Python'
+import { Stats, PythonOutput } from './Python'
 
 export const AppContext = React.createContext({
   dataArr: null,
   iterationCount: null,
   formInput: null,
+  inputVerified: null,
+  pythonPass: null,
   output: PythonOutput,
   stats: Stats,
   saveData: () => { },
   trackPython: () => { },
-  saveForm: () => { }
+  saveForm: () => { },
+  verifiedInput: () => { },
+  pythonRestart: () => { }
 });
 
 class App extends Component {
@@ -25,11 +29,15 @@ class App extends Component {
       dataArr: null,
       iterationCount: 0, //default = 0
       formInput: null,
+      inputVerified: false,
+      pythonPass: true,
       output: "",
       stats: "",
       saveData: this.saveData,
       trackPython: this.trackPython,
-      saveForm: this.saveForm
+      saveForm: this.saveForm,
+      verifiedInput: this.verifiedInput,
+      pythonRestart: this.pythonRestart
     };
   }
 
@@ -68,13 +76,11 @@ class App extends Component {
           var outputsFromPython = res.data.name
           var formState = this.state.formInput
           var outputArr = outputsFromPython.split("SEPERATOR")
-          console.log(outputArr)
-          //If no SEPERATOR, gives entire output. Else, will seperate the diff parts into an array. Can handle when necessary.
-          this.setState({ output: new PythonOutput(outputArr[3].trim()) })
           this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
+          this.setState({ output: new PythonOutput(outputArr[3].trim()) })
         }).catch(err => {
-          console.log(err)
-          alert("An error has occured, sorry please restart. Maybe with a different dataset?")
+          this.setState({ pythonPass: false })
+          alert("An error has occured while processing Python. Maybe try with a different dataset? I will restart the tool for you.")
         })
       )
     });
@@ -82,8 +88,15 @@ class App extends Component {
   }
 
   saveData = (e) => {
-    console.log(e)
     this.setState({ dataArr: e })
+  }
+
+  verifiedInput = () => {
+    this.setState({ inputVerified: true })
+  }
+
+  pythonRestart = () => {
+    this.setState({ pythonPass: true })
   }
 
   saveForm = (e) => {
