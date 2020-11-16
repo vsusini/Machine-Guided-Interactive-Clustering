@@ -20,7 +20,7 @@ export class Stats {
         this.possibleConstraints = samples * samples
         this.totalConstraints = (clSize + mlSize + unknownSize)
         this.constraintsLeft = (this.possibleConstraints * (maxConstraint / 100)) - this.totalConstraints
-        this.constrainedPercent = Math.round((this.totalConstraints / (this.possibleConstraints * (maxConstraint / 100))) * 100)
+        this.constrainedPercent = Math.ceil((this.totalConstraints / (this.possibleConstraints * (maxConstraint / 100))) * 100)
         //Sihloutte Values 
         this.silAvg = Math.round(silAvg * 1000)/1000
         this.silMax = Math.round(silMax * 1000)/1000
