@@ -78,6 +78,9 @@ class FileForm extends Component {
                                             onSubmit={async values => {
                                                 values.filename = this.fileName
                                                 context.verifiedInput()
+                                                if (values.questionsPerIteration % 2 !== 0){
+                                                    values.questionsPerIteration = parseInt(values.questionsPerIteration) - 1
+                                                }
                                                 context.saveForm(values)
                                                 context.trackPython([],[], [])
                                                 uploadFile()
