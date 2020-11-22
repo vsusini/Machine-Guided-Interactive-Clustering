@@ -57,10 +57,8 @@ class FileForm extends Component {
                             <div className="outerBorders w-75">
                                 <Card className="border border-dark">
                                     <Card.Body>
-                                        <Card.Title>Input Your Information</Card.Title>
-                                        <Card.Text>
-                                            With supporting text below as a natural lead-in to additional content.
-                                            </Card.Text>
+                                        <Card.Title className="text-center">Input Your Information</Card.Title>
+                                        <label className="pt-2">Upload a Numerical Dataset</label>
                                         <div className="input-group">
                                             <div className="custom-file">
                                                 <input type="file" className="custom-file-input" ref={this.el} accept=".csv" onChange={handleChange} />
@@ -92,7 +90,7 @@ class FileForm extends Component {
                                                 <Row>
                                                     <Col>
                                                         <MyTextInput
-                                                            label="Questions Per Iteration"
+                                                            label="Questions per Iteration"
                                                             name="questionsPerIteration"
                                                             placeholder="">
                                                         </MyTextInput>
@@ -117,7 +115,7 @@ class FileForm extends Component {
                                                     </Col>
                                                 </Row>
                                                 <Row className="align-middle align-items-center text-center">
-                                                    <Button type="submit" className="mt-3">Submit Values </Button>
+                                                    <Button type="submit" className="mt-3">Start</Button>
                                                 </Row>
                                             </Form>
                                         </Formik>

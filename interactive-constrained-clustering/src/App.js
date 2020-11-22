@@ -53,10 +53,8 @@ class App extends Component {
       formData.append('filename', this.state.formInput.filename)
       formData.append('interation_num', this.state.iterationCount + 1);
       this.setState({ iterationCount: this.state.iterationCount + 1 })
-      // formData.append('question_num', this.state.formInput.numberOfClusters)
-      // formData.append('cluster_num', this.state.formInput.cluster_num)
-      formData.append('question_num', 10)
-      formData.append('cluster_num', 2)
+      formData.append('question_num', this.state.formInput.questionsPerIteration)
+      formData.append('cluster_num', this.state.formInput.numberOfClusters)
       let totalML = this.state.formInput.ml.concat(ml)
       let totalCL = this.state.formInput.cl.concat(cl)
       let unknownCL = this.state.formInput.unknown.concat(unknown)
@@ -77,10 +75,16 @@ class App extends Component {
           var formState = this.state.formInput
           var outputArr = outputsFromPython.split("SEPERATOR")
           this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
-          this.setState({ output: new PythonOutput(outputArr[3].trim()) })
+          if (outputArr[3].length === 2){
+            this.setState({pythonPass: false})
+            alert("An error has occured while processing the Model. Maybe try with a different dataset? I will restart the tool for you.")
+          } else {
+            this.setState({ output: new PythonOutput(outputArr[3].trim()) })
+          }
         }).catch(err => {
+          console.log("Caught the Error")
           this.setState({ pythonPass: false })
-          alert("An error has occured while processing Python. Maybe try with a different dataset? I will restart the tool for you.")
+          alert("An error has occured while processing the Model. Maybe try with a different dataset? I will restart the tool for you.")
         })
       )
     });

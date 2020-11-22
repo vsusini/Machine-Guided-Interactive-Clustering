@@ -28,12 +28,9 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
         # Generates the setup for constraints from input from the user.
         ml = create_constraint(ml_converted)
         cl = create_constraint(cl_converted)
-        # How to add to the constraints
-        ml_con = []
-        cl_con = []
         # Applying new constraints to the model
         model = PCKMeans(n_clusters=cluster_num)
-        model.fit(data, ml=ml_con, cl=cl_con)
+        model.fit(data, ml=ml, cl=cl)
     else:
         model = PCKMeans(n_clusters=cluster_num)
         model.fit(data)
@@ -51,8 +48,8 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
     #dump(obj, open(filename, mode))
     pickle.dump(model, open(
         'interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
-
-    compute_questions(data, model.labels_, clustering_iter, question_num)
+    compute_questions(data, model.labels_, clustering_iter,
+                      question_num, must_link_constraints, cant_link_constraints)
 
 
 '''
@@ -81,7 +78,7 @@ def create_constraint(links):
     return final_link
 
 
-def compute_questions(data, labels, clustering_iter, question_num):
+def compute_questions(data, labels, clustering_iter, question_num, ml, cl):
     categorical_ix = gather_data_information(data)
     if not categorical_ix:
         # For situation where all numeric columns
@@ -121,6 +118,12 @@ def compute_questions(data, labels, clustering_iter, question_num):
             found = search_in_question_set(
                 question_set, value[0], closest_neighbor_index[index])
             if found:
+                found = search_in_question_set(
+                    ml, value[0], closest_neighbor_index[index])
+                if found:
+                    found = search_in_question_set(
+                        cl, value[0], closest_neighbor_index[index])
+            if found:
                 question_set.append(value[0])
                 question_set.append(closest_neighbor_index[index])
                 found = True
@@ -134,6 +137,12 @@ def compute_questions(data, labels, clustering_iter, question_num):
             if labels[closest_neighbor_index[index]] != labels[value[0]]:
                 found = search_in_question_set(
                     question_set, value[0], closest_neighbor_index[index])
+                if found:
+                    found = search_in_question_set(
+                        ml, value[0], closest_neighbor_index[index])
+                    if found:
+                        found = search_in_question_set(
+                            cl, value[0], closest_neighbor_index[index])
                 if found:
                     question_set.append(value[0])
                     question_set.append(closest_neighbor_index[index])
@@ -151,9 +160,10 @@ Checks if two samples are already inputed to the question set or not.
 
 def search_in_question_set(set, v1, v2):
     for i in range(len(set)-1):
-        if set[i] == v1 and set[i+1] == v2:
+        #print("Set[i]: " ,set[i], "Set[i+1]:", set[i+1], "V1: " ,v1, "V2: ", v2 )
+        if int(set[i]) == int(v1) and int(set[i+1]) == int(v2):
             return False
-        if set[i] == v2 and set[i+1] == v1:
+        if int(set[i]) == int(v2) and int(set[i+1]) == int(v1):
             return False
     return True
 

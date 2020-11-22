@@ -68,13 +68,11 @@ export const Questions = (props) => {
                                 </div>
                                 <div className="rowNoMargin">
                                     <Col className="outerBorders marginLeft0 lign-middle align-items-center">
-                                        {/* <TableDisplay dataArr={context.dataArr} set={[1, 2, 3, 4]}></TableDisplay> */}
-                                        {/* For when the loading is implemented */}
                                         <TableDisplay dataArr={context.dataArr} set={context.output.question_set}></TableDisplay>
                                     </Col>
                                     <Col className="">
                                         <Row className="outerBorders">
-                                            <ButtonsComponent set={context.output.question_set} python={context.trackPython} totalQuestion={context.formInput.questionsPerIteration}></ButtonsComponent>
+                                            <ButtonsComponent set={context.output.question_set} python={context.trackPython} totalQuestion={context.formInput.questionsPerIteration} totalPercent={context.stats.constrainedPercent}></ButtonsComponent>
                                         </Row>
                                         <Row className="outerBorders">
                                             <SquareStatDisplay stats={context.stats}></SquareStatDisplay>
