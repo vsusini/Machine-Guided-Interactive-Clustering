@@ -96,6 +96,7 @@ class App extends Component {
   }
 
   pythonRestart = () => {
+    this.setState({ iterationCount: 0 })
     this.setState({ pythonPass: true })
   }
 
