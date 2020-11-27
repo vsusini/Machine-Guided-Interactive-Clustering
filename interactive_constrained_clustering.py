@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn import datasets, metrics
 from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
+from active_semi_clustering.exceptions import InconsistentConstraintsException
 import matplotlib.pyplot as plt
 import sys
 import pickle
@@ -30,10 +31,20 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
         cl = create_constraint(cl_converted)
         # Applying new constraints to the model
         model = PCKMeans(n_clusters=cluster_num)
-        model.fit(data, ml=ml, cl=cl)
+        try:
+            model.fit(data, ml=ml, cl=cl)
+        except InconsistentConstraintsException:
+            #Error 2 sent to client to handle properly.
+            print(2) 
+            raise Exception("Inconsistent constraints")
     else:
         model = PCKMeans(n_clusters=cluster_num)
-        model.fit(data)
+        try:
+            model.fit(data)
+        except TypeError:
+            #Error 1 sent to client to handle properly.
+            print(1) 
+            raise Exception("There exists categorical values in the dataset.")
 
     # Creation of graph for image.
     # plt.style.use('dark_background')

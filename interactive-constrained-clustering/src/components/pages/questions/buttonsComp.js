@@ -10,6 +10,7 @@ class ButtonsComponent extends Component {
         this.trackPython = props.python
         this.totalQuestion = props.totalQuestion
         this.totalPercent = props.totalPercent  //To track when to disable buttons. 
+        this.pythonPass = props.pythonPass //To track when Python fails. To also disable buttons. 
         this.mlArr = []
         this.clArr = []
         this.unknown = []
@@ -70,15 +71,17 @@ class ButtonsComponent extends Component {
                     </Row>
                     <Row className="align-middle align-items-center text-center mt-3">
                         <Col>
-                            {parseInt(this.totalPercent) >= 100 ? 
+                            {parseInt(this.totalPercent) >= 100 || Boolean(this.pythonPass) === false ? 
                             <Button onClick={this.handleMustLink} disabled>Must-Link</Button> : 
                             <Button onClick={this.handleMustLink}>Must-Link</Button>}
                         </Col>
                         <Col>
-                            <Button onClick={this.handleUnkown}>Unknown</Button>
+                            {parseInt(this.totalPercent) >= 100 || Boolean(this.pythonPass) === false ? 
+                            <Button onClick={this.handleUnkown} disabled>Unknown</Button> : 
+                            <Button onClick={this.handleUnkown}>Unknown</Button>}
                         </Col>
                         <Col>
-                            {parseInt(this.totalPercent) >= 100 ? 
+                            {parseInt(this.totalPercent) >= 100 || Boolean(this.pythonPass) === false ? 
                             <Button onClick={this.handleCantLink} disabled>Cannot-Link</Button> : 
                             <Button onClick={this.handleCantLink}>Cannot-Link</Button>}
                         </Col>

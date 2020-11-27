@@ -68,23 +68,26 @@ class App extends Component {
           unknown: unknownCL
         }
       });
+      let outputsFromPython
       resolve(
         axios.post('http://localhost:4500/python', formData, {
         }).then(res => {
-          var outputsFromPython = res.data.name
+          outputsFromPython = res.data.name
           var formState = this.state.formInput
           var outputArr = outputsFromPython.split("SEPERATOR")
-          this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
-          if (outputArr[3].length === 2){
-            this.setState({pythonPass: false})
-            alert("An error has occured while processing the Model. Maybe try with a different dataset? I will restart the tool for you.")
+          if (parseInt(outputsFromPython) === 2) {
+            this.setState({ iterationCount: this.state.iterationCount - 1 })
+            this.setState({ pythonPass: false })
+            alert("There was a constraint conflict. The tool can no longer improve.")
           } else {
+            this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
             this.setState({ output: new PythonOutput(outputArr[3].trim()) })
           }
-        }).catch(err => {
-          console.log("Caught the Error")
-          this.setState({ pythonPass: false })
-          alert("An error has occured while processing the Model. Maybe try with a different dataset? I will restart the tool for you.")
+        }).catch(_ => {
+          if (parseInt(outputsFromPython) === 1) {
+            this.setState({ inputVerified: false })
+            alert("The dataset that was uploaded had categorical information. The tool can only handle numbers at this time. The tool will now restart.")
+          }
         })
       )
     });

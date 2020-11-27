@@ -22,7 +22,7 @@ export default function Router() {
                             <Route exact path="/questions"
                                 render={() => {
                                     return (
-                                        context.inputVerified && context.pythonPass ?
+                                        context.inputVerified ?
                                             <Questions /> :
                                             handleRedirect(context)
                                     )

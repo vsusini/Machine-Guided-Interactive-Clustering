@@ -72,7 +72,7 @@ export const Questions = (props) => {
                                     </Col>
                                     <Col className="">
                                         <Row className="outerBorders">
-                                            <ButtonsComponent set={context.output.question_set} python={context.trackPython} totalQuestion={context.formInput.questionsPerIteration} totalPercent={context.stats.constrainedPercent}></ButtonsComponent>
+                                            <ButtonsComponent set={context.output.question_set} python={context.trackPython} totalQuestion={context.formInput.questionsPerIteration} totalPercent={context.stats.constrainedPercent} pythonPass={context.pythonPass}></ButtonsComponent>
                                         </Row>
                                         <Row className="outerBorders">
                                             <SquareStatDisplay stats={context.stats}></SquareStatDisplay>
