@@ -12,7 +12,7 @@ from distython import HEOM
 from numpy import genfromtxt
 
 
-def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints):
+def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
     # y is target = Goal of ML
     # How to use a dataset from sklearn
     #data = datasets.load_breast_cancer(return_X_y=True)[0]
@@ -34,16 +34,16 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
         try:
             model.fit(data, ml=ml, cl=cl)
         except InconsistentConstraintsException:
-            #Error 2 sent to client to handle properly.
-            print(2) 
+            # Error 2 sent to client to handle properly.
+            print(2)
             raise Exception("Inconsistent constraints")
     else:
         model = PCKMeans(n_clusters=cluster_num)
         try:
             model.fit(data)
         except TypeError:
-            #Error 1 sent to client to handle properly.
-            print(1) 
+            # Error 1 sent to client to handle properly.
+            print(1)
             raise Exception("There exists categorical values in the dataset.")
 
     # Creation of graph for image.
@@ -60,7 +60,7 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
     pickle.dump(model, open(
         'interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
     compute_questions(data, model.labels_, clustering_iter,
-                      question_num, must_link_constraints, cant_link_constraints)
+                      question_num, must_link_constraints, cant_link_constraints, unknown_constraints)
 
 
 '''
@@ -89,7 +89,7 @@ def create_constraint(links):
     return final_link
 
 
-def compute_questions(data, labels, clustering_iter, question_num, ml, cl):
+def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unknown):
     categorical_ix = gather_data_information(data)
     if not categorical_ix:
         # For situation where all numeric columns
@@ -134,6 +134,9 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl):
                 if found:
                     found = search_in_question_set(
                         cl, value[0], closest_neighbor_index[index])
+                    if found:
+                        found = search_in_question_set(
+                            unknown, value[0], closest_neighbor_index[index])
             if found:
                 question_set.append(value[0])
                 question_set.append(closest_neighbor_index[index])
@@ -154,6 +157,9 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl):
                     if found:
                         found = search_in_question_set(
                             cl, value[0], closest_neighbor_index[index])
+                        if found:
+                            found = search_in_question_set(
+                                unknown, value[0], closest_neighbor_index[index])
                 if found:
                     question_set.append(value[0])
                     question_set.append(closest_neighbor_index[index])
@@ -211,9 +217,11 @@ question_num = int(sys.argv[3])
 cluster_num = int(sys.argv[4])
 ml = sys.argv[5].split(",")
 cl = sys.argv[6].split(",")
+unknown = sys.argv[7].split(",")
 
 # FOr testing purposes
 # ml = [1,2,3,4,5,6]
 # cl = [1,2,3,4,5,6]
 
-create_model(filename, cluster_iter, question_num, cluster_num, ml, cl)
+create_model(filename, cluster_iter, question_num,
+             cluster_num, ml, cl, unknown)

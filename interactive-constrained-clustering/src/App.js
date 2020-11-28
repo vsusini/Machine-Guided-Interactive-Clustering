@@ -57,15 +57,16 @@ class App extends Component {
       formData.append('cluster_num', this.state.formInput.numberOfClusters)
       let totalML = this.state.formInput.ml.concat(ml)
       let totalCL = this.state.formInput.cl.concat(cl)
-      let unknownCL = this.state.formInput.unknown.concat(unknown)
+      let unknownC = this.state.formInput.unknown.concat(unknown)
       formData.append('ml', totalML)
       formData.append('cl', totalCL)
+      formData.append('unknown', unknownC)
       this.setState({
         formInput: {
           ...this.state.formInput,
           ml: totalML,
           cl: totalCL,
-          unknown: unknownCL
+          unknown: unknownC
         }
       });
       let outputsFromPython
