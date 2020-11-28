@@ -30,7 +30,7 @@ export const Questions = () => {
                     :
                     <AppContext.Consumer>
                         {context => (
-                            <div className="mx-4">
+                            <div className="mx-4 overflow-auto">
                                 <div className="outerBorders rowNoMargin topOuterBorder">
                                     <Col>
 

@@ -28,6 +28,11 @@ html{
   margin-left: 1rem;
 }
 
+.noXPadding{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 .topOuterBorder{
   margin-top: 1rem;
   margin-right: 0rem;

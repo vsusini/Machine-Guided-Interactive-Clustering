@@ -11,12 +11,12 @@ class Summary extends Component {
                 <AppContext.Consumer>
                     {context => {
                         return (
-                            <div>
-                                <div className="outerBorders rowNoMargin topOuterBorder mx-5">
+                            <div className="overflow-auto">
+                                <div className="outerBorders rowNoMargin mx-4 mt-3">
                                     <RecStatDisplay stats={context.stats} iterationCount={context.iterationCount}></RecStatDisplay>
                                 </div>
                                 <div className="rowNoMargin">
-                                    <Col>
+                                    <Col className="noXPadding">
                                         <ChartsDisplay iterationCount={context.iterationCount}></ChartsDisplay>
                                     </Col>
                                 </div>
