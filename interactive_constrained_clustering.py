@@ -36,7 +36,7 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
         except InconsistentConstraintsException:
             # Error 2 sent to client to handle properly.
             print(2)
-            raise Exception("Inconsistent constraints")
+            raise InconsistentConstraintsException("Inconsistent constraints")
     else:
         model = PCKMeans(n_clusters=cluster_num)
         try:
@@ -44,7 +44,7 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
         except TypeError:
             # Error 1 sent to client to handle properly.
             print(1)
-            raise Exception("There exists categorical values in the dataset.")
+            raise TypeError("There exists categorical values in the dataset.")
 
     # Creation of graph for image.
     # plt.style.use('dark_background')
@@ -126,45 +126,56 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unkno
         closest_neighbor_index = neighbor.kneighbors(
             data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
         while not found:
-            found = search_in_question_set(
-                question_set, value[0], closest_neighbor_index[index])
-            if found:
-                found = search_in_question_set(
-                    ml, value[0], closest_neighbor_index[index])
-                if found:
+            try:
+                if labels[closest_neighbor_index[index]] != labels[value[0]]:
                     found = search_in_question_set(
-                        cl, value[0], closest_neighbor_index[index])
+                        question_set, value[0], closest_neighbor_index[index])
                     if found:
                         found = search_in_question_set(
-                            unknown, value[0], closest_neighbor_index[index])
-            if found:
-                question_set.append(value[0])
-                question_set.append(closest_neighbor_index[index])
-                found = True
-            index += 1
+                            ml, value[0], closest_neighbor_index[index])
+                        if found:
+                            found = search_in_question_set(
+                                cl, value[0], closest_neighbor_index[index])
+                            if found:
+                                found = search_in_question_set(
+                                    unknown, value[0], closest_neighbor_index[index])
+                if found:
+                    question_set.append(value[0])
+                    question_set.append(closest_neighbor_index[index])
+                    found = True
+                index += 1
+            except IndexError:
+                # Error 3 sent to client to handle properly.
+                print(3)
+                raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
         found = False
         index = 2  # 0th element is itself, 1st element is assigned above.
         closest_neighbor_index = neighbor.kneighbors(
             data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
         while not found:
-            if labels[closest_neighbor_index[index]] != labels[value[0]]:
-                found = search_in_question_set(
-                    question_set, value[0], closest_neighbor_index[index])
-                if found:
+            try:
+                if labels[closest_neighbor_index[index]] != labels[value[0]]:
                     found = search_in_question_set(
-                        ml, value[0], closest_neighbor_index[index])
+                        question_set, value[0], closest_neighbor_index[index])
                     if found:
                         found = search_in_question_set(
-                            cl, value[0], closest_neighbor_index[index])
+                            ml, value[0], closest_neighbor_index[index])
                         if found:
                             found = search_in_question_set(
-                                unknown, value[0], closest_neighbor_index[index])
+                                cl, value[0], closest_neighbor_index[index])
+                            if found:
+                                found = search_in_question_set(
+                                    unknown, value[0], closest_neighbor_index[index])
                 if found:
                     question_set.append(value[0])
                     question_set.append(closest_neighbor_index[index])
                     found = True
-            index += 1
+                index += 1
+            except IndexError:
+                # Error 3 sent to client to handle properly.
+                print(3)
+                raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
     print(question_set)
     # Send the indecies for the bottom values to React.
 

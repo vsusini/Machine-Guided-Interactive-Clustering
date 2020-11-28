@@ -76,10 +76,15 @@ class App extends Component {
           outputsFromPython = res.data.name
           var formState = this.state.formInput
           var outputArr = outputsFromPython.split("SEPERATOR")
+          //The if catches any errors that Python may return. 
           if (parseInt(outputsFromPython) === 2) {
             this.setState({ iterationCount: this.state.iterationCount - 1 })
             this.setState({ pythonPass: false })
             alert("There was a constraint conflict. The tool can no longer improve.")
+          } else if(parseInt(outputArr[3]) === 3) {
+            this.setState({ iterationCount: this.state.iterationCount - 1 })
+            this.setState({ pythonPass: false })
+            alert("Due to the chosen constraints, the tool was unable to find "+this.state.formInput.questionsPerIteration+" questions. The tool can no longer improve.")
           } else {
             this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
             this.setState({ output: new PythonOutput(outputArr[3].trim()) })

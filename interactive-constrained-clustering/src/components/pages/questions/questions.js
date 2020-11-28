@@ -10,7 +10,7 @@ import { usePromiseTracker } from 'react-promise-tracker';
 import Loader from 'react-promise-loader';
 import SquareStatDisplay from '../../statsDisplays/squareStatDisplay'
 
-export const Questions = (props) => {
+export const Questions = () => {
     const { promiseInProgress } = usePromiseTracker()
     function handleImagePassing(count) {
         try {
@@ -24,6 +24,7 @@ export const Questions = (props) => {
             {
                 (promiseInProgress === true) ?
                     <div>
+                        {/* <span className="align-middle align-items-center h-90vh">Loading...</span> */}
                         <Loader promiseTracker={usePromiseTracker} />
                     </div>
                     :

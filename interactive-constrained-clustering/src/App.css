@@ -98,6 +98,11 @@ html{
   max-width: 90% !important;
 }
 
+/* Made to support the loading title in Question.js */
+/* .h-90vh{
+  height: 90vh;
+} */
+
 /* For the landing page */
 /* Supports the Title in the center */
 .align-items-center {
