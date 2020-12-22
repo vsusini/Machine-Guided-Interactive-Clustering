@@ -1,0 +1,7 @@
+numpy==1.18.1
+sklearn==0.0
+active-semi-supervised-clustering==0.0.1
+matplotlib==3.2.1
+pickleshare==0.7.5
+pandas==1.0.1
+distython==0.0.3
