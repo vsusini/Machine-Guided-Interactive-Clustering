@@ -28,6 +28,14 @@ html{
   margin-left: 1rem;
 }
 
+.outerBordersNoneRight{
+  background-color: white;
+  padding: 1.25rem;
+  border-radius: 25px;
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+}
+
 .noXPadding{
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -88,25 +96,12 @@ html{
 .leftHalf {
   background-size: contain;
   background: url("./images/landingPage.png") no-repeat center;
-  position: absolute;
-}
-
-.fullScreen{
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  left: 0;
 }
 
 .modal-90w{
   width: 90% !important;
   max-width: 90% !important;
 }
-
-/* Made to support the loading title in Question.js */
-/* .h-90vh{
-  height: 90vh;
-} */
 
 /* For the landing page */
 /* Supports the Title in the center */
