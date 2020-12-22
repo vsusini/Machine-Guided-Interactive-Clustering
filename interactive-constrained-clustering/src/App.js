@@ -50,7 +50,13 @@ class App extends Component {
   runPython = (ml, cl, unknown) => {
     const promise = new Promise((resolve) => {
       const formData = new FormData();
-      var baseUrl = process.env.baseURL || "http://localhost:4500"
+      var baseUrl;
+      if (window.location.origin === "http://localhost:3000"){
+          baseUrl = "http://localhost:4500"
+      } else{
+          baseUrl = window.location.origin
+      }
+      console.log(baseUrl)
       formData.append('filename', this.state.formInput.filename)
       formData.append('interation_num', this.state.iterationCount + 1);
       this.setState({ iterationCount: this.state.iterationCount + 1 })

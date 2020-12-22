@@ -47,7 +47,13 @@ class FileForm extends Component {
                         let uploadFile = () => {
                             const formData = new FormData();
                             formData.append('file', this.file); // appending file
-                            var baseUrl = process.env.baseURL || "http://localhost:4500"
+                            var baseUrl;
+                            if (window.location.origin === "http://localhost:3000"){
+                                baseUrl = "http://localhost:4500"
+                            } else{
+                                baseUrl = window.location.origin
+                            }
+                            console.log(baseUrl)
                             axios.post(baseUrl + '/upload', formData, {
                             }).then(res => {
                                 this.name = res.data.name
