@@ -47,10 +47,11 @@ class FileForm extends Component {
                         let uploadFile = () => {
                             const formData = new FormData();
                             formData.append('file', this.file); // appending file
-                            axios.post('http://localhost:4500/upload', formData, {
+                            var baseUrl = process.env.baseURL || "http://localhost:4500"
+                            axios.post(baseUrl + '/upload', formData, {
                             }).then(res => {
                                 this.name = res.data.name
-                                this.path = 'http://localhost:4500' + res.data.path
+                                this.path = baseUrl + res.data.path
                             }).catch(err => console.log(err.response))
                         }
                         return (
@@ -76,11 +77,11 @@ class FileForm extends Component {
                                             onSubmit={async values => {
                                                 values.filename = this.fileName
                                                 context.verifiedInput()
-                                                if (values.questionsPerIteration % 2 !== 0){
+                                                if (values.questionsPerIteration % 2 !== 0) {
                                                     values.questionsPerIteration = parseInt(values.questionsPerIteration) - 1
                                                 }
                                                 context.saveForm(values)
-                                                context.trackPython([],[], [])
+                                                context.trackPython([], [], [])
                                                 uploadFile()
                                                 const { history } = this.props
                                                 history.push("/questions")
