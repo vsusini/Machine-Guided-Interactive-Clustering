@@ -9,6 +9,7 @@ import ButtonsComponent from "./buttonsComp"
 import { usePromiseTracker } from 'react-promise-tracker';
 import Loader from 'react-promise-loader';
 import SquareStatDisplay from '../../statsDisplays/squareStatDisplay'
+import Notification from '../../notification'
 
 export const Questions = () => {
     const { promiseInProgress } = usePromiseTracker()
@@ -31,6 +32,7 @@ export const Questions = () => {
                     <AppContext.Consumer>
                         {context => (
                             <div className="mx-4 overflow-auto">
+                                <Notification text={context.errorMessage} show={context.error} />
                                 <div className="outerBorders rowNoMargin topOuterBorder">
                                     <Col>
 

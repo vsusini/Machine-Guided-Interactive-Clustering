@@ -12,6 +12,8 @@ export const AppContext = React.createContext({
   formInput: null,
   inputVerified: null,
   pythonPass: null,
+  error: null,
+  errorMessage: "",
   output: PythonOutput,
   stats: Stats,
   saveData: () => { },
@@ -31,6 +33,8 @@ class App extends Component {
       formInput: null,
       inputVerified: false,
       pythonPass: true,
+      error: false,
+      errorMessage: "",
       output: "",
       stats: "",
       saveData: this.saveData,
@@ -51,10 +55,10 @@ class App extends Component {
     const promise = new Promise((resolve) => {
       const formData = new FormData();
       var baseUrl;
-      if (window.location.origin === "http://localhost:3000"){
-          baseUrl = "http://localhost:4500"
-      } else{
-          baseUrl = window.location.origin
+      if (window.location.origin === "http://localhost:3000") {
+        baseUrl = "http://localhost:4500"
+      } else {
+        baseUrl = window.location.origin
       }
       console.log(baseUrl)
       formData.append('filename', this.state.formInput.filename)
@@ -85,26 +89,31 @@ class App extends Component {
           var outputArr = outputsFromPython.split("SEPERATOR")
           //The if catches any errors that Python may return. 
           if (parseInt(outputsFromPython) === 2) {
-            this.setState({ iterationCount: this.state.iterationCount - 1 })
-            this.setState({ pythonPass: false })
-            alert("There was a constraint conflict. The tool can no longer improve.")
+            this.handleMissingDataErrors("There was a constraint conflict. The tool can no longer improve.")
           } else if (parseInt(outputArr[3]) === 3) {
-            this.setState({ iterationCount: this.state.iterationCount - 1 })
-            this.setState({ pythonPass: false })
-            alert("Due to the chosen constraints, the tool was unable to find " + this.state.formInput.questionsPerIteration + " questions. The tool can no longer improve.")
+            this.handleMissingDataErrors("Due to the chosen constraints, the tool was unable to find " + this.state.formInput.questionsPerIteration + " questions. The tool can no longer improve.")
           } else {
+            //Passed all the errors, continue on with the process. 
             this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
             this.setState({ output: new PythonOutput(outputArr[3].trim()) })
+            this.errorFalse() //Remove any errors that may have been created previously. 
           }
         }).catch(_ => {
           if (parseInt(outputsFromPython) === 1) {
             this.setState({ inputVerified: false })
-            alert("The dataset that was uploaded had categorical information. The tool can only handle numbers at this time. The tool will now restart.")
+            this.setState({ errorMessage: "The dataset that was uploaded had categorical information. The tool can only handle numbers at this time." })
           }
         })
       )
     });
     return promise;
+  }
+
+  handleMissingDataErrors = (message) => {
+    this.setState({ iterationCount: this.state.iterationCount - 1 })
+    this.setState({ pythonPass: false })
+    this.setState({ error: true })
+    this.setState({ errorMessage: message })
   }
 
   saveData = (e) => {
@@ -117,7 +126,12 @@ class App extends Component {
 
   pythonRestart = () => {
     this.setState({ iterationCount: 0 })
+    this.setState({ error: true })
     this.setState({ pythonPass: true })
+  }
+
+  errorFalse = () => {
+    this.setState({ error: false })
   }
 
   saveForm = (e) => {

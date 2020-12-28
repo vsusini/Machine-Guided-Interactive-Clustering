@@ -11,15 +11,15 @@
   height: 100vh;
 }
 
-html{
+html {
   background-color: #f7f6f6;
 }
 
-.lessImagePadding{
+.lessImagePadding {
   padding: 0.25rem !important;
 }
 
-.outerBorders{
+.outerBorders {
   background-color: white;
   padding: 1.25rem;
   border-radius: 25px;
@@ -28,7 +28,7 @@ html{
   margin-left: 1rem;
 }
 
-.outerBordersNoneRight{
+.outerBordersNoneRight {
   background-color: white;
   padding: 1.25rem;
   border-radius: 25px;
@@ -36,36 +36,36 @@ html{
   margin-left: 1rem;
 }
 
-.noXPadding{
+.noXPadding {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
 
-.topOuterBorder{
+.topOuterBorder {
   margin-top: 1rem;
   margin-right: 0rem;
   margin-left: 0rem;
 }
 
-.fixLinkOverButtonHover{
-  color: white !important; 
+.fixLinkOverButtonHover {
+  color: white !important;
   text-decoration: none !important;
 }
 
 /* Used to support the table input. Bootstrap has a margin I dont need.  */
-.marginTop0{
+.marginTop0 {
   margin-top: 0rem;
 }
 
-.titleFontSize{
+.titleFontSize {
   font-size: 270%;
 }
 
-.marginLeft0{
+.marginLeft0 {
   margin-left: 0rem !important;
 }
 
-.marginBottom0{
+.marginBottom0 {
   margin-bottom: 0rem !important;
 }
 
@@ -73,7 +73,7 @@ html{
   background-color: #f7f6f6;
 }
 
-.lineForStats{
+.lineForStats {
   border-right: 1px solid gray;
 }
 
@@ -98,7 +98,7 @@ html{
   background: url("./images/landingPage.png") no-repeat center;
 }
 
-.modal-90w{
+.modal-90w {
   width: 90% !important;
   max-width: 90% !important;
 }
@@ -116,7 +116,7 @@ html{
   flex-wrap: wrap !important;
 }
 
-.containerNoPadding{
+.containerNoPadding {
   width: 100%;
   margin-right: auto;
   margin-left: auto;
@@ -125,4 +125,11 @@ html{
 .individTitleForStats {
   color: grey;
   font-size: 70%
+}
+
+.notification {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 9999;
 }
