@@ -43,11 +43,11 @@ app.post('/python', (req, res) => {
     const spawn = require('child_process').spawn;
     const ls = spawn('python', pythonArr);
 
-    var values
+    var values = ""
 
     ls.stdout.on('data', (data) => {
         console.log(data.toString())
-        values = data.toString()
+        values += data.toString()
     });
 
     ls.stderr.on('data', (data) => {
