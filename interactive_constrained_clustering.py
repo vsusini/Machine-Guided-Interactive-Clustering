@@ -7,19 +7,16 @@ import sys
 import pickle
 from sklearn.neighbors import NearestNeighbors
 import pandas as pd
-from pandas.api.types import is_string_dtype
-from distython import HEOM
-from numpy import genfromtxt
+from pandas.api.types import is_object_dtype, is_bool_dtype
 
 
 def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
-    # y is target = Goal of ML
-    # How to use a dataset from sklearn
-    #data = datasets.load_breast_cancer(return_X_y=True)[0]
     # "TODO: Consider implementing more ways to handle data. Ex. Datasets without features in first row. ")
     data = pd.read_csv('datasets/'+filename)
     data = data.to_numpy()
+    data = convert_problematic_data(data)
     # Working for directly to a numpy array. Can be done below. dtype=None to try and handle strings properly.
+    # from numpy import genfromtxt
     # data = genfromtxt('datasets/'+filename, delimiter=',')
     # data = np.delete(data, 0, 0)  # Delete first row of the data for the titles.
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
@@ -44,23 +41,43 @@ def create_model(filename, clustering_iter, question_num, cluster_num, must_link
         except TypeError:
             # Error 1 sent to client to handle properly.
             print(1)
-            raise TypeError("There exists categorical values in the dataset.")
+            raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
 
     # Creation of graph for image.
-    # plt.style.use('dark_background')
-    # plt.cm.RdGy nice red good for whtie plt.cm.BrBG nice green and brown
-    plt.scatter(data[:, 0], data[:, 1],
-                c=model.labels_, s=10, cmap=plt.cm.RdBu)
-    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" +
-                cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
+    # plt.style.use('dark_background') for landing page pic
+    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdBu)
+    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
     # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
     # Save model.
     #dump(obj, open(filename, mode))
-    pickle.dump(model, open(
-        'interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
-    compute_questions(data, model.labels_, clustering_iter,
-                      question_num, must_link_constraints, cant_link_constraints, unknown_constraints)
+    pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
+    compute_questions(data, model.labels_, clustering_iter,question_num, must_link_constraints, cant_link_constraints, unknown_constraints)
+
+
+'''
+Takes a dataset
+Converts all data that is not numerical into numerical data. 
+Returns an updated dataset with all numiercal values. 
+'''
+
+
+def convert_problematic_data(data):
+    df = pd.DataFrame(data=data)
+    df = df.infer_objects() 
+    category_columns = []
+    # Determine which columns are categorical
+    for i in range(0, len(df.columns)):
+        if is_object_dtype(df[i]) or is_bool_dtype(df[i]):
+            category_columns.append(i)
+    #Convert all the category columns into values
+    for i in category_columns:
+        if is_object_dtype(df[i]):
+            df[i] = df[i].astype('category')
+            df[i] = df[i].cat.codes
+        elif is_bool_dtype(df[i]):
+            df[i] = df[i].replace([True,False],[1,0])
+    return df.to_numpy()
 
 
 '''
@@ -90,16 +107,7 @@ def create_constraint(links):
 
 
 def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unknown):
-    categorical_ix = gather_data_information(data)
-    if not categorical_ix:
-        # For situation where all numeric columns
-        #print("Running minkowski algo")
-        neighbor = NearestNeighbors()
-    else:
-        # For situation where a category exists that is not numerical
-        #print("Running HEOM algo")
-        heom_metric = HEOM(data, categorical_ix)
-        neighbor = NearestNeighbors(metric=heom_metric.heom)
+    neighbor = NearestNeighbors()
     neighbor.fit(data)
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
     sil_arr = metrics.silhouette_samples(data, labels)
@@ -177,7 +185,6 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unkno
                 print(3)
                 raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
     print(question_set)
-    # Send the indecies for the bottom values to React.
 
 
 '''
@@ -195,24 +202,6 @@ def search_in_question_set(set, v1, v2):
             return False
     return True
 
-
-'''
-Takes a dataset
-Exports a list full of columns indices that are not numerical from the dataset.
-'''
-
-
-def gather_data_information(data):
-    df = pd.DataFrame(data=data)
-    category_columns = []
-    # Determine which columns are categorical
-    for i in range(0, len(df.columns)):
-        if is_string_dtype(df[i]):
-            category_columns.append(i)
-    #print("Category Columns:", category_columns)
-    return category_columns
-
-
 '''
 filename - filename within datasets folder to search for. 
 clustering_iter - to support the naming of the clustering in images.
@@ -220,6 +209,7 @@ question_num - the input from the landing page will set the num of samples that 
 cluster_num - the number of clusters for the PCKmeans algorithm.
 ml - The must link constraints from the oracle.
 cl - The can't link constraints from the oracle.
+unknown - The unknown constraints from the oracle. 
 '''
 # Handle incoming values from program call.
 filename = str(sys.argv[1])
@@ -230,9 +220,4 @@ ml = sys.argv[5].split(",")
 cl = sys.argv[6].split(",")
 unknown = sys.argv[7].split(",")
 
-# FOr testing purposes
-# ml = [1,2,3,4,5,6]
-# cl = [1,2,3,4,5,6]
-
-create_model(filename, cluster_iter, question_num,
-             cluster_num, ml, cl, unknown)
+create_model(filename, cluster_iter, question_num, cluster_num, ml, cl, unknown)

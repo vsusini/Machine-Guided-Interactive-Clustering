@@ -100,8 +100,8 @@ class App extends Component {
           }
         }).catch(_ => {
           if (parseInt(outputsFromPython) === 1) {
-            this.setState({ inputVerified: false })
             this.setState({ errorMessage: "The dataset that was uploaded had categorical information. The tool can only handle numbers at this time." })
+            this.setState({ inputVerified: false })
           }
         })
       )
