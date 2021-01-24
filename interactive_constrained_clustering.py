@@ -10,51 +10,6 @@ import pandas as pd
 from pandas.api.types import is_object_dtype, is_bool_dtype
 
 
-def create_model(filename, clustering_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
-    # "TODO: Consider implementing more ways to handle data. Ex. Datasets without features in first row. ")
-    data = pd.read_csv('datasets/'+filename)
-    data = data.to_numpy()
-    data = convert_problematic_data(data)
-    # Working for directly to a numpy array. Can be done below. dtype=None to try and handle strings properly.
-    # from numpy import genfromtxt
-    # data = genfromtxt('datasets/'+filename, delimiter=',')
-    # data = np.delete(data, 0, 0)  # Delete first row of the data for the titles.
-    # Will not be aware of ml or cl constraints until after user passes Iteration 1
-    if int(cluster_iter) != 1:
-        ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
-        cl_converted = [i for i in zip(*[iter(cant_link_constraints)]*2)]
-        # Generates the setup for constraints from input from the user.
-        ml = create_constraint(ml_converted)
-        cl = create_constraint(cl_converted)
-        # Applying new constraints to the model
-        model = PCKMeans(n_clusters=cluster_num)
-        try:
-            model.fit(data, ml=ml, cl=cl)
-        except InconsistentConstraintsException:
-            # Error 2 sent to client to handle properly.
-            print(2)
-            raise InconsistentConstraintsException("Inconsistent constraints")
-    else:
-        model = PCKMeans(n_clusters=cluster_num)
-        try:
-            model.fit(data)
-        except TypeError:
-            # Error 1 sent to client to handle properly.
-            print(1)
-            raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
-
-    # Creation of graph for image.
-    # plt.style.use('dark_background') for landing page pic
-    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdBu)
-    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
-    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
-
-    # Save model.
-    #dump(obj, open(filename, mode))
-    pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
-    compute_questions(data, model.labels_, clustering_iter,question_num, must_link_constraints, cant_link_constraints, unknown_constraints)
-
-
 '''
 Takes a dataset
 Converts all data that is not numerical into numerical data. 
@@ -106,15 +61,93 @@ def create_constraint(links):
     return final_link
 
 
-def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unknown):
-    neighbor = NearestNeighbors()
-    neighbor.fit(data)
+'''
+Supports in question_set calculation. 
+Checks if two samples are already inputed to the question set or not. 
+'''
+
+
+def search_in_question_set(set, v1, v2):
+    for i in range(len(set)-1):
+        #print("Set[i]: " ,set[i], "Set[i+1]:", set[i+1], "V1: " ,v1, "V2: ", v2 )
+        if int(set[i]) == int(v1) and int(set[i+1]) == int(v2):
+            return False
+        if int(set[i]) == int(v2) and int(set[i+1]) == int(v1):
+            return False
+    return True
+
+
+def compute_questions(filename, cluster_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
+    data = convert_problematic_data(pd.read_csv('datasets/'+filename).to_numpy())
+    # Working for directly to a numpy array. Can be done below. dtype=None to try and handle strings properly.
+    # from numpy import genfromtxt
+    # data = genfromtxt('datasets/'+filename, delimiter=',')
+    # data = np.delete(data, 0, 0)  # Delete first row of the data for the titles.
+    # Will not be aware of ml or cl constraints until after user passes Iteration 1
+    if int(cluster_iter) != 1:
+        ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
+        cl_converted = [i for i in zip(*[iter(cant_link_constraints)]*2)]
+        # Generates the setup for constraints from input from the user.
+        ml = create_constraint(ml_converted)
+        cl = create_constraint(cl_converted)
+        # Applying new constraints to the model
+        model = PCKMeans(n_clusters=cluster_num)
+        try:
+            model.fit(data, ml=ml, cl=cl)
+        except InconsistentConstraintsException:
+            # Error 2 sent to client to handle properly.
+            print(2)
+            raise InconsistentConstraintsException("Inconsistent constraints")
+        clusters_inc_model = PCKMeans(n_clusters=cluster_num+1)
+        clusters_inc_model.fit(data, ml=ml, cl=cl)
+        #Don't need to sort these as avg is the only value being taken from this. 
+        cluster_inc_sil_arr = metrics.silhouette_samples(data, clusters_inc_model.labels_)
+        if cluster_num > 2:
+            clusters_dec_model = PCKMeans(n_clusters=cluster_num-1)
+            clusters_dec_model.fit(data, ml=ml, cl=cl)
+            #Don't need to sort these as avg is the only value being taken from this. 
+            cluster_dec_sil_arr = metrics.silhouette_samples(data, clusters_dec_model.labels_)
+    else:
+        model = PCKMeans(n_clusters=cluster_num)
+        try:
+            model.fit(data)
+        except TypeError:
+            # Error 1 sent to client to handle properly.
+            print(1)
+            raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
+
+    # Creation of graph for image.
+    # plt.style.use('dark_background') for landing page pic
+    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdBu)
+    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
+    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
+
+    # Save model.
+    #dump(obj, open(filename, mode))
+    pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
+
+    labels = model.labels_
     sil_arr = metrics.silhouette_samples(data, labels)
     sorted_sil_arr = sorted(sil_arr)
+    avg_sil = sum(sorted_sil_arr)/len(sorted_sil_arr)
+    #cluster+1 and cluster-1 portion for silhoutte. Determine if we must flag the notif in front-end app. 
+    sil_change_value = 0
+    if int(cluster_iter) != 1:
+        avg_inc_sil = sum(cluster_inc_sil_arr)/len(cluster_inc_sil_arr)
+        if int(cluster_num) > 2:
+            avg_dec_sil = sum(cluster_dec_sil_arr)/len(cluster_dec_sil_arr)
+            if avg_sil < avg_inc_sil and avg_dec_sil < avg_inc_sil:
+                sil_change_value = 4
+            elif avg_sil < avg_dec_sil and avg_inc_sil < avg_dec_sil:
+                sil_change_value = 5
+        else:
+            if avg_sil < avg_inc_sil:
+                sil_change_value = 4
+
     print(sorted_sil_arr[0])
     print("SEPERATOR")
-    print(sum(sorted_sil_arr)/len(sorted_sil_arr))
+    print(avg_sil)
     print("SEPERATOR")
     print(sorted_sil_arr[-1])
     print("SEPERATOR")
@@ -124,6 +157,9 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unkno
     # Converting the lowest indecies into an array of list(index,index) based on nearest sets of clusters.
     for value in sorted_sil_arr[:int(question_num/2)]:
         question_set_indices += np.where(sil_arr == value)
+    #Creating neighbor to determine nearest nodes. 
+    neighbor = NearestNeighbors()
+    neighbor.fit(data)
     # Format for question_set: [valueQuestioned(VQ), VQSameNeighbor, VQ, VQDiffNeighbor, VQ2, VQ2SameNeighbor, VQ2, VQ2DiffNeighbor,...]
     # This format is used to support the transfer into javascript.
     question_set = []
@@ -131,8 +167,7 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unkno
         # Sets the even value of the array to the nearest neighbour.
         found = False
         index = 1
-        closest_neighbor_index = neighbor.kneighbors(
-            data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
+        closest_neighbor_index = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
         while not found:
             try:
                 if labels[closest_neighbor_index[index]] != labels[value[0]]:
@@ -140,13 +175,13 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unkno
                         question_set, value[0], closest_neighbor_index[index])
                     if found:
                         found = search_in_question_set(
-                            ml, value[0], closest_neighbor_index[index])
+                            must_link_constraints, value[0], closest_neighbor_index[index])
                         if found:
                             found = search_in_question_set(
-                                cl, value[0], closest_neighbor_index[index])
+                                cant_link_constraints, value[0], closest_neighbor_index[index])
                             if found:
                                 found = search_in_question_set(
-                                    unknown, value[0], closest_neighbor_index[index])
+                                    unknown_constraints, value[0], closest_neighbor_index[index])
                 if found:
                     question_set.append(value[0])
                     question_set.append(closest_neighbor_index[index])
@@ -168,13 +203,13 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unkno
                         question_set, value[0], closest_neighbor_index[index])
                     if found:
                         found = search_in_question_set(
-                            ml, value[0], closest_neighbor_index[index])
+                            must_link_constraints, value[0], closest_neighbor_index[index])
                         if found:
                             found = search_in_question_set(
-                                cl, value[0], closest_neighbor_index[index])
+                                cant_link_constraints, value[0], closest_neighbor_index[index])
                             if found:
                                 found = search_in_question_set(
-                                    unknown, value[0], closest_neighbor_index[index])
+                                    unknown_constraints, value[0], closest_neighbor_index[index])
                 if found:
                     question_set.append(value[0])
                     question_set.append(closest_neighbor_index[index])
@@ -185,22 +220,9 @@ def compute_questions(data, labels, clustering_iter, question_num, ml, cl, unkno
                 print(3)
                 raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
     print(question_set)
+    print("SEPERATOR")
+    print(sil_change_value)
 
-
-'''
-Supports in question_set calculation. 
-Checks if two samples are already inputed to the question set or not. 
-'''
-
-
-def search_in_question_set(set, v1, v2):
-    for i in range(len(set)-1):
-        #print("Set[i]: " ,set[i], "Set[i+1]:", set[i+1], "V1: " ,v1, "V2: ", v2 )
-        if int(set[i]) == int(v1) and int(set[i+1]) == int(v2):
-            return False
-        if int(set[i]) == int(v2) and int(set[i+1]) == int(v1):
-            return False
-    return True
 
 '''
 filename - filename within datasets folder to search for. 
@@ -220,4 +242,4 @@ ml = sys.argv[5].split(",")
 cl = sys.argv[6].split(",")
 unknown = sys.argv[7].split(",")
 
-create_model(filename, cluster_iter, question_num, cluster_num, ml, cl, unknown)
+compute_questions(filename, cluster_iter, question_num, cluster_num, ml, cl, unknown)

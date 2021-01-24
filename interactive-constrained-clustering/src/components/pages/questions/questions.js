@@ -32,7 +32,8 @@ export const Questions = () => {
                     <AppContext.Consumer>
                         {context => (
                             <div className="mx-4 overflow-auto">
-                                <Notification text={context.errorMessage} show={context.error} />
+                                <Notification text={context.notifMessage} show={context.error} type="" />
+                                <Notification text={context.notifMessage} show={context.warning} type="warning" func={context.changeClusterNum} />
                                 <div className="outerBorders rowNoMargin topOuterBorder">
                                     <Col>
 

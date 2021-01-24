@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
-import { Toast } from 'react-bootstrap';
+import { Toast, Button, Row, Col } from 'react-bootstrap';
 
 function Notification(props) {
-    const [showA, setShowA] = useState(props.show);
+    const [show, setShow] = useState(props.show);
 
-    const toggleShowA = () => setShowA(!showA);
+    const toggleShow = () => setShow(!show);
 
     return (
         <div>
-            <div className="notification bg-danger">
-                <Toast show={showA} onClose={toggleShowA}>
-                    <Toast.Header className="bg-danger">
+            <div className={props.type === "warning" ? "notification bg-warning" : "notification bg-danger"}>
+                <Toast show={show} onClose={toggleShow}>
+                    <Toast.Header className={props.type === "warning" ? "bg-warning" : "bg-danger"}>
                         <strong className="mr-auto text-white">Interactive Constrained Clustering</strong>
                     </Toast.Header>
-                    <Toast.Body>{props.text}</Toast.Body>
+                    <Toast.Body>
+                        <span>{props.text}</span>
+                        {props.type === "warning" ?
+                            <Row className="text-center">
+                                <Col>
+                                    <Button onClick={() => {
+                                        props.func()
+                                        toggleShow()
+                                    }} className="btn-sm">Yes</Button>
+                                </Col>
+                                <Col>
+                                    <Button onClick={toggleShow} className="btn-sm">No</Button>
+                                </Col>
+                            </Row>
+                            : null
+                        }
+                    </Toast.Body>
                 </Toast>
             </div>
         </div>

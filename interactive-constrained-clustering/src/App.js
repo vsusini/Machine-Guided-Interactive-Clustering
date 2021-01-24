@@ -13,9 +13,12 @@ export const AppContext = React.createContext({
   inputVerified: null,
   pythonPass: null,
   error: null,
-  errorMessage: "",
+  warning: null,
+  clusterAdjustmentFlag: null,
+  notifMessage: "",
   output: PythonOutput,
   stats: Stats,
+  changeClusterNum: () => { },
   saveData: () => { },
   trackPython: () => { },
   saveForm: () => { },
@@ -34,9 +37,12 @@ class App extends Component {
       inputVerified: false,
       pythonPass: true,
       error: false,
-      errorMessage: "",
+      warning: false,
+      clusterAdjustmentFlag: 0,
+      notifMessage: "",
       output: "",
       stats: "",
+      changeClusterNum: this.changeClusterNum,
       saveData: this.saveData,
       trackPython: this.trackPython,
       saveForm: this.saveForm,
@@ -60,7 +66,9 @@ class App extends Component {
       } else {
         baseUrl = window.location.origin
       }
-      console.log(baseUrl)
+      //console.log(baseUrl)
+      this.setState({ clusterAdjustmentFlag: 0 })
+      this.setState({ warning: false })
       formData.append('filename', this.state.formInput.filename)
       formData.append('interation_num', this.state.iterationCount + 1);
       this.setState({ iterationCount: this.state.iterationCount + 1 })
@@ -87,6 +95,7 @@ class App extends Component {
           outputsFromPython = res.data.name
           var formState = this.state.formInput
           var outputArr = outputsFromPython.split("SEPERATOR")
+          console.log(outputArr)
           //The if catches any errors that Python may return. 
           if (parseInt(outputsFromPython) === 2) {
             this.handleMissingDataErrors("There was a constraint conflict. The tool can no longer improve.")
@@ -96,11 +105,21 @@ class App extends Component {
             //Passed all the errors, continue on with the process. 
             this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
             this.setState({ output: new PythonOutput(outputArr[3].trim()) })
+            if (parseInt(outputArr[4]) !== 0) {
+              this.setState({ warning: true })
+              if (parseInt(outputArr[4]) === 4) {
+                this.setState({ clusterAdjustmentFlag: 4 })
+                this.setState({ notifMessage: "The tool noticed that an increased cluster value improves the silhoutte values. Would you like to change the number of clusters to " + (parseInt(this.state.formInput.numberOfClusters) + 1) + "?" })
+              } else {
+                this.setState({ clusterAdjustmentFlag: 5 })
+                this.setState({ notifMessage: "The tool noticed that a decreased cluster value improves the silhoutte values. Would you like to change the number of clusters to " + (parseInt(this.state.formInput.numberOfClusters) - 1) + "?" })
+              }
+            }
             this.errorFalse() //Remove any errors that may have been created previously. 
           }
         }).catch(_ => {
           if (parseInt(outputsFromPython) === 1) {
-            this.setState({ errorMessage: "The dataset that was uploaded had categorical information. The tool can only handle numbers at this time." })
+            this.setState({ notifMessage: "The dataset that was uploaded had categorical information. The tool can only handle numbers at this time." })
             this.setState({ inputVerified: false })
           }
         })
@@ -109,11 +128,29 @@ class App extends Component {
     return promise;
   }
 
+  changeClusterNum = () => {
+    if (this.state.clusterAdjustmentFlag === 4) {
+      this.setState({
+        formInput: {
+          ...this.state.formInput,
+          numberOfClusters: this.state.formInput.numberOfClusters + 1
+        }
+      });
+    } else {
+      this.setState({
+        formInput: {
+          ...this.state.formInput,
+          numberOfClusters: this.state.formInput.numberOfClusters - 1
+        }
+      });
+    }
+  }
+
   handleMissingDataErrors = (message) => {
     this.setState({ iterationCount: this.state.iterationCount - 1 })
     this.setState({ pythonPass: false })
     this.setState({ error: true })
-    this.setState({ errorMessage: message })
+    this.setState({ notifMessage: message })
   }
 
   saveData = (e) => {

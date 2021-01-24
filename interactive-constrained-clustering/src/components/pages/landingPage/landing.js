@@ -12,7 +12,7 @@ class Landing extends Component {
                 <AppContext.Consumer>
                     {context => (
                         <>
-                            <Notification text={context.errorMessage} show={context.error} />
+                            <Notification text={context.notifMessage} show={context.error} type=""/>
                             <div className="rowNoMargin imgSection">
                                 <Col className="col-sm-6 align-middle align-items-center text-center leftHalf">
                                     <h1 className="text-white titleFontSize">Interactive Constrained Clustering</h1>
