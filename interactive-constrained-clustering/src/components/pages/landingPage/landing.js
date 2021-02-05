@@ -15,7 +15,7 @@ class Landing extends Component {
                             <Notification text={context.notifMessage} show={context.error} type=""/>
                             <div className="rowNoMargin imgSection">
                                 <Col className="col-sm-6 align-middle align-items-center text-center leftHalf">
-                                    <h1 className="text-white titleFontSize">Interactive Constrained Clustering</h1>
+                                    <h1 className="text-white titleFontSize">Machine Guided Interactive Clustering (MAGIC)</h1>
                                 </Col>
                                 <Col className="col-sm-6 align-middle align-items-center">
                                     <FileUpload></FileUpload>

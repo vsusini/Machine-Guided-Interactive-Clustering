@@ -46,7 +46,6 @@ app.post('/python', (req, res) => {
     var values = ""
 
     ls.stdout.on('data', (data) => {
-        console.log(data.toString())
         values += data.toString()
     });
 

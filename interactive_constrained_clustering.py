@@ -5,7 +5,7 @@ from active_semi_clustering.exceptions import InconsistentConstraintsException
 import matplotlib.pyplot as plt
 import sys
 import pickle
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import NearestNeighbors, LocalOutlierFactor
 import pandas as pd
 from pandas.api.types import is_object_dtype, is_bool_dtype
 
@@ -76,6 +76,33 @@ def search_in_question_set(set, v1, v2):
             return False
     return True
 
+def find_pair(index, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints): 
+        found = False
+        closest_neighbor_index = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
+        while not found:
+            try:
+                if labels[closest_neighbor_index[index]] != labels[value[0]]:
+                    found = search_in_question_set(
+                        question_set, value[0], closest_neighbor_index[index])
+                    if found:
+                        found = search_in_question_set(
+                            must_link_constraints, value[0], closest_neighbor_index[index])
+                        if found:
+                            found = search_in_question_set(
+                                cant_link_constraints, value[0], closest_neighbor_index[index])
+                            if found:
+                                found = search_in_question_set(
+                                    unknown_constraints, value[0], closest_neighbor_index[index])
+                if found:
+                    question_set.append(value[0])
+                    question_set.append(closest_neighbor_index[index])
+                    found = True
+                index += 1
+            except IndexError:
+                # Error 3 sent to client to handle properly.
+                print(3)
+                raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
+
 
 def compute_questions(filename, cluster_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
     data = convert_problematic_data(pd.read_csv('datasets/'+filename).to_numpy())
@@ -116,9 +143,10 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
             print(1)
             raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
 
+    labels = model.labels_
     # Creation of graph for image.
     # plt.style.use('dark_background') for landing page pic
-    plt.scatter(data[:, 0], data[:, 1], c=model.labels_, s=10, cmap=plt.cm.RdBu)
+    plt.scatter(data[:, 0], data[:, 1], c=labels, s=10, cmap=plt.cm.RdBu)
     plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
     # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
@@ -127,9 +155,18 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
 
-    labels = model.labels_
+    clf = LocalOutlierFactor()
+    clf = clf.fit(data)
+    neg_out_arr = clf.negative_outlier_factor_
+    normalized_nog = map(lambda x, r=float(np.max(neg_out_arr) - np.min(neg_out_arr)): ((x - np.min(neg_out_arr)) / r), neg_out_arr)
+
     sil_arr = metrics.silhouette_samples(data, labels)
     sorted_sil_arr = sorted(sil_arr)
+    normalized_sil = map(lambda x, r=float(np.max(sil_arr) - np.min(sil_arr)): ((x - np.min(sil_arr)) / r), sil_arr)
+
+    normalized_magic = [(g + h) / 2 for g, h in zip(normalized_sil, normalized_nog)]
+    sorted_norm_magic = sorted(normalized_magic)
+
     avg_sil = sum(sorted_sil_arr)/len(sorted_sil_arr)
     #cluster+1 and cluster-1 portion for silhoutte. Determine if we must flag the notif in front-end app. 
     sil_change_value = 0
@@ -145,18 +182,20 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
             if avg_sil < avg_inc_sil:
                 sil_change_value = 4
 
-    print(sorted_sil_arr[0])
+    #Min
+    print(sorted_norm_magic[0])
     print("SEPERATOR")
-    print(avg_sil)
+    print(str(sum(normalized_magic)/len(normalized_magic)))
     print("SEPERATOR")
-    print(sorted_sil_arr[-1])
+    #Max
+    print(sorted_norm_magic[-1])
     print("SEPERATOR")
 
     question_set_indices = []
     # Interested in question_num/2 unreliable data points as we will compare the nearest neighbour of same node and nearest neighbour of a diffrent node
     # Converting the lowest indecies into an array of list(index,index) based on nearest sets of clusters.
-    for value in sorted_sil_arr[:int(question_num/2)]:
-        question_set_indices += np.where(sil_arr == value)
+    for v in sorted_norm_magic[:int(question_num/2)]:
+        question_set_indices += np.where(normalized_magic == v)
     #Creating neighbor to determine nearest nodes. 
     neighbor = NearestNeighbors()
     neighbor.fit(data)
@@ -165,60 +204,9 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
-        found = False
-        index = 1
-        closest_neighbor_index = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
-        while not found:
-            try:
-                if labels[closest_neighbor_index[index]] != labels[value[0]]:
-                    found = search_in_question_set(
-                        question_set, value[0], closest_neighbor_index[index])
-                    if found:
-                        found = search_in_question_set(
-                            must_link_constraints, value[0], closest_neighbor_index[index])
-                        if found:
-                            found = search_in_question_set(
-                                cant_link_constraints, value[0], closest_neighbor_index[index])
-                            if found:
-                                found = search_in_question_set(
-                                    unknown_constraints, value[0], closest_neighbor_index[index])
-                if found:
-                    question_set.append(value[0])
-                    question_set.append(closest_neighbor_index[index])
-                    found = True
-                index += 1
-            except IndexError:
-                # Error 3 sent to client to handle properly.
-                print(3)
-                raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
+        find_pair(1, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
-        found = False
-        index = 2  # 0th element is itself, 1st element is assigned above.
-        closest_neighbor_index = neighbor.kneighbors(
-            data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
-        while not found:
-            try:
-                if labels[closest_neighbor_index[index]] != labels[value[0]]:
-                    found = search_in_question_set(
-                        question_set, value[0], closest_neighbor_index[index])
-                    if found:
-                        found = search_in_question_set(
-                            must_link_constraints, value[0], closest_neighbor_index[index])
-                        if found:
-                            found = search_in_question_set(
-                                cant_link_constraints, value[0], closest_neighbor_index[index])
-                            if found:
-                                found = search_in_question_set(
-                                    unknown_constraints, value[0], closest_neighbor_index[index])
-                if found:
-                    question_set.append(value[0])
-                    question_set.append(closest_neighbor_index[index])
-                    found = True
-                index += 1
-            except IndexError:
-                # Error 3 sent to client to handle properly.
-                print(3)
-                raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
+        find_pair(2, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
     print(question_set)
     print("SEPERATOR")
     print(sil_change_value)

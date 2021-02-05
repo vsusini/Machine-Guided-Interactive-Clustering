@@ -109,10 +109,10 @@ class App extends Component {
               this.setState({ warning: true })
               if (parseInt(outputArr[4]) === 4) {
                 this.setState({ clusterAdjustmentFlag: 4 })
-                this.setState({ notifMessage: "The tool noticed that an increased cluster value improves the silhoutte values. Would you like to change the number of clusters to " + (parseInt(this.state.formInput.numberOfClusters) + 1) + "?" })
+                this.setState({ notifMessage: "The tool noticed that an increased cluster value improves the MAGIC score. Would you like to change the number of clusters to " + (parseInt(this.state.formInput.numberOfClusters) + 1) + "?" })
               } else {
                 this.setState({ clusterAdjustmentFlag: 5 })
-                this.setState({ notifMessage: "The tool noticed that a decreased cluster value improves the silhoutte values. Would you like to change the number of clusters to " + (parseInt(this.state.formInput.numberOfClusters) - 1) + "?" })
+                this.setState({ notifMessage: "The tool noticed that a decreased cluster value improves the MAGIC score. Would you like to change the number of clusters to " + (parseInt(this.state.formInput.numberOfClusters) - 1) + "?" })
               }
             }
             this.errorFalse() //Remove any errors that may have been created previously. 
@@ -133,14 +133,14 @@ class App extends Component {
       this.setState({
         formInput: {
           ...this.state.formInput,
-          numberOfClusters: this.state.formInput.numberOfClusters + 1
+          numberOfClusters: parseInt(this.state.formInput.numberOfClusters) + 1
         }
       });
     } else {
       this.setState({
         formInput: {
           ...this.state.formInput,
-          numberOfClusters: this.state.formInput.numberOfClusters - 1
+          numberOfClusters: parseInt(this.state.formInput.numberOfClusters) - 1
         }
       });
     }

@@ -65,7 +65,7 @@ class FileForm extends Component {
                                 <Card className="border border-dark">
                                     <Card.Body>
                                         <Card.Title className="text-center">Input Your Information</Card.Title>
-                                        <label className="pt-2">Upload a Numerical Dataset</label>
+                                        <label className="pt-2">Upload a Dataset</label>
                                         <div className="input-group">
                                             <div className="custom-file">
                                                 <input type="file" className="custom-file-input" ref={this.el} accept=".csv" onChange={handleChange} />

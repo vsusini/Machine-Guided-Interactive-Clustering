@@ -16,7 +16,7 @@ function Notification(props) {
                     <Toast.Body>
                         <span>{props.text}</span>
                         {props.type === "warning" ?
-                            <Row className="text-center">
+                            <Row className="text-center mt-2">
                                 <Col>
                                     <Button onClick={() => {
                                         props.func()

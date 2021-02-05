@@ -31,16 +31,16 @@ class SquareStatDisplay extends Component {
                             </Row>
                         </Col>
                         <Col className="text-center">
-                            Silhouette
+                            MAGIC Score
                             <Row>
                                 <Col xs={4}>
-                                    <StatNumber number={this.state.stats.silMin} name="Silhouette Minimum"></StatNumber>
+                                    <StatNumber number={this.state.stats.silMin} name="MAGIC Score Minimum"></StatNumber>
                                 </Col>
                                 <Col xs={4}>
-                                    <StatNumber number={this.state.stats.silAvg} name="Silhouette Average"></StatNumber>
+                                    <StatNumber number={this.state.stats.silAvg} name="MAGIC Score Average"></StatNumber>
                                 </Col>
                                 <Col xs={4}>
-                                    <StatNumber number={this.state.stats.silMax} name="Silhouette Maximum"></StatNumber>
+                                    <StatNumber number={this.state.stats.silMax} name="MAGIC Score Maximum"></StatNumber>
                                 </Col>
                             </Row>
                         </Col>
