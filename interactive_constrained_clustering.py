@@ -1,23 +1,21 @@
 import numpy as np
-from sklearn import datasets, metrics
 from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 from active_semi_clustering.exceptions import InconsistentConstraintsException
 import matplotlib.pyplot as plt
 import sys
 import pickle
+from sklearn import datasets, metrics
 from sklearn.neighbors import NearestNeighbors, LocalOutlierFactor
+from sklearn.ensemble import IsolationForest
 import pandas as pd
 from pandas.api.types import is_object_dtype, is_bool_dtype
 
-
-'''
-Takes a dataset
-Converts all data that is not numerical into numerical data. 
-Returns an updated dataset with all numiercal values. 
-'''
-
-
 def convert_problematic_data(data):
+    '''
+    Takes a dataset
+    Converts all data that is not numerical into numerical data. 
+    Returns an updated dataset with all numiercal values. 
+    '''
     df = pd.DataFrame(data=data)
     df = df.infer_objects() 
     category_columns = []
@@ -34,20 +32,17 @@ def convert_problematic_data(data):
             df[i] = df[i].replace([True,False],[1,0])
     return df.to_numpy()
 
-
-'''
-Takes a list of (index, index) lists. 
-Exports links to be symettric and linked based off of logic within links. 
-
-Input: [(40, 41), (42, 41)]
-Output: [(40, 41), (41, 40), (42, 41), (41, 42), (40, 42), (42, 40)]
-
-Input: [(40, 41), (42, 43)]
-Output: [(40, 41), (41, 40), (42, 43), (42, 43)]
-'''
-
-
 def create_constraint(links):
+    '''
+    Takes a list of (index, index) lists. 
+    Exports links to be symettric and linked based off of logic within links. 
+
+    Input: [(40, 41), (42, 41)]
+    Output: [(40, 41), (41, 40), (42, 41), (41, 42), (40, 42), (42, 40)]
+
+    Input: [(40, 41), (42, 43)]
+    Output: [(40, 41), (41, 40), (42, 43), (43, 42)]
+    '''
     final_link = []
     for link in links:
         final_link.append((int(link[0]), int(link[1])))
@@ -60,14 +55,11 @@ def create_constraint(links):
                 final_link.append((int(link2[1]), int(link[0])))
     return final_link
 
-
-'''
-Supports in question_set calculation. 
-Checks if two samples are already inputed to the question set or not. 
-'''
-
-
 def search_in_question_set(set, v1, v2):
+    '''
+    Supports in question_set calculation. 
+    Checks if two samples are already inputed to the question set or not. 
+    '''
     for i in range(len(set)-1):
         #print("Set[i]: " ,set[i], "Set[i+1]:", set[i+1], "V1: " ,v1, "V2: ", v2 )
         if int(set[i]) == int(v1) and int(set[i+1]) == int(v2):
@@ -103,13 +95,8 @@ def find_pair(index, neighbor, data, value, labels, question_set, must_link_cons
                 print(3)
                 raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
 
-
 def compute_questions(filename, cluster_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
     data = convert_problematic_data(pd.read_csv('datasets/'+filename).to_numpy())
-    # Working for directly to a numpy array. Can be done below. dtype=None to try and handle strings properly.
-    # from numpy import genfromtxt
-    # data = genfromtxt('datasets/'+filename, delimiter=',')
-    # data = np.delete(data, 0, 0)  # Delete first row of the data for the titles.
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
         ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
@@ -153,19 +140,20 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     # Save model.
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
+
+    #Isolation Forest Anomoly Score
+    if_samp = IsolationForest(random_state=0).fit(data).score_samples(data)
+    norm_if_scores = map(lambda x, r=float(np.max(if_samp) - np.min(if_samp)): ((x - np.min(if_samp)) / r), if_samp)
+
+    #Local Outlier Factor
+    neg_out_arr = LocalOutlierFactor().fit(data).negative_outlier_factor_
+    norm_nog = map(lambda x, r=float(np.max(neg_out_arr) - np.min(neg_out_arr)): ((x - np.min(neg_out_arr)) / r), neg_out_arr)
+
+    #Sihlouette
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
-
-    clf = LocalOutlierFactor()
-    clf = clf.fit(data)
-    neg_out_arr = clf.negative_outlier_factor_
-    normalized_nog = map(lambda x, r=float(np.max(neg_out_arr) - np.min(neg_out_arr)): ((x - np.min(neg_out_arr)) / r), neg_out_arr)
-
     sil_arr = metrics.silhouette_samples(data, labels)
     sorted_sil_arr = sorted(sil_arr)
-    normalized_sil = map(lambda x, r=float(np.max(sil_arr) - np.min(sil_arr)): ((x - np.min(sil_arr)) / r), sil_arr)
-
-    normalized_magic = [(g + h) / 2 for g, h in zip(normalized_sil, normalized_nog)]
-    sorted_norm_magic = sorted(normalized_magic)
+    norm_sil = map(lambda x, r=float(np.max(sil_arr) - np.min(sil_arr)): ((x - np.min(sil_arr)) / r), sil_arr)
 
     avg_sil = sum(sorted_sil_arr)/len(sorted_sil_arr)
     #cluster+1 and cluster-1 portion for silhoutte. Determine if we must flag the notif in front-end app. 
@@ -182,9 +170,15 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
             if avg_sil < avg_inc_sil:
                 sil_change_value = 4
 
+
+    #Take all the normalized metric arrays, determine the avg to provide for question determination
+    normalized_magic = [((x*0.5) + (y*0.25) + (z*0.25)) for x, y, z in zip(norm_sil, norm_nog, norm_if_scores)]
+    sorted_norm_magic = sorted(normalized_magic)
+
     #Min
     print(sorted_norm_magic[0])
     print("SEPERATOR")
+    #Avg
     print(str(sum(normalized_magic)/len(normalized_magic)))
     print("SEPERATOR")
     #Max
@@ -210,7 +204,6 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     print(question_set)
     print("SEPERATOR")
     print(sil_change_value)
-
 
 '''
 filename - filename within datasets folder to search for. 
