@@ -12,25 +12,23 @@ from pandas.api.types import is_object_dtype, is_bool_dtype
 
 def convert_problematic_data(data):
     '''
-    Takes a dataset
+    Takes a pandas dataframe
     Converts all data that is not numerical into numerical data. 
-    Returns an updated dataset with all numiercal values. 
+    Returns an updated dataframe with one hot encoding. 
     '''
-    df = pd.DataFrame(data=data)
-    df = df.infer_objects() 
+    df = data.infer_objects() 
+    print(df.dtypes)
     category_columns = []
     # Determine which columns are categorical
-    for i in range(0, len(df.columns)):
-        if is_object_dtype(df[i]) or is_bool_dtype(df[i]):
-            category_columns.append(i)
-    #Convert all the category columns into values
-    for i in category_columns:
-        if is_object_dtype(df[i]):
-            df[i] = df[i].astype('category')
-            df[i] = df[i].cat.codes
-        elif is_bool_dtype(df[i]):
-            df[i] = df[i].replace([True,False],[1,0])
-    return df.to_numpy()
+    for column in df:
+        print(df[column].dtype)
+        if(df[column].dtype == "object"):
+            df[column] = df[column].astype('category')
+            df = df.drop(columns=[column]) #Drop em for now but gotta actually do something with em later
+        elif(df[column].dtype == "bool"):
+            df = df.drop(columns=[column]) #Drop these too for now
+    #TODO: One hot encoding
+    return df
 
 def create_constraint(links):
     '''
@@ -96,7 +94,8 @@ def find_pair(index, neighbor, data, value, labels, question_set, must_link_cons
                 raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
 
 def compute_questions(filename, cluster_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
-    data = convert_problematic_data(pd.read_csv('datasets/'+filename).to_numpy())
+    df = convert_problematic_data(pd.read_csv('datasets/' + filename))
+    numpy_data = df.to_numpy()
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
         ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
@@ -107,51 +106,53 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
         # Applying new constraints to the model
         model = PCKMeans(n_clusters=cluster_num)
         try:
-            model.fit(data, ml=ml, cl=cl)
+            model.fit(numpy_data, ml=ml, cl=cl)
         except InconsistentConstraintsException:
             # Error 2 sent to client to handle properly.
             print(2)
             raise InconsistentConstraintsException("Inconsistent constraints")
         clusters_inc_model = PCKMeans(n_clusters=cluster_num+1)
-        clusters_inc_model.fit(data, ml=ml, cl=cl)
+        clusters_inc_model.fit(numpy_data, ml=ml, cl=cl)
         #Don't need to sort these as avg is the only value being taken from this. 
-        cluster_inc_sil_arr = metrics.silhouette_samples(data, clusters_inc_model.labels_)
+        cluster_inc_sil_arr = metrics.silhouette_samples(numpy_data, clusters_inc_model.labels_)
         if cluster_num > 2:
             clusters_dec_model = PCKMeans(n_clusters=cluster_num-1)
-            clusters_dec_model.fit(data, ml=ml, cl=cl)
+            clusters_dec_model.fit(numpy_data, ml=ml, cl=cl)
             #Don't need to sort these as avg is the only value being taken from this. 
-            cluster_dec_sil_arr = metrics.silhouette_samples(data, clusters_dec_model.labels_)
+            cluster_dec_sil_arr = metrics.silhouette_samples(numpy_data, clusters_dec_model.labels_)
     else:
         model = PCKMeans(n_clusters=cluster_num)
         try:
-            model.fit(data)
+            model.fit(numpy_data)
         except TypeError:
             # Error 1 sent to client to handle properly.
             print(1)
             raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
 
     labels = model.labels_
-    # Creation of graph for image.
-    # plt.style.use('dark_background') for landing page pic
-    plt.scatter(data[:, 0], data[:, 1], c=labels, s=10, cmap=plt.cm.RdBu)
-    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
-    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
-    # Save model.
+    # Save model and data.
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
+    pickle.dump(model, open('interactive-constrained-clustering/src/model/temp/latest_model.sav', 'wb'))
+    pickle.dump(numpy_data, open('interactive-constrained-clustering/src/model/temp/latest_numpy_data.sav', 'wb'))
+    pickle.dump(df, open('interactive-constrained-clustering/src/model/temp/latest_df.sav', 'wb'))
+
+
+    # Creation of graph for image.
+    generate_image()
 
     #Isolation Forest Anomoly Score
-    if_samp = IsolationForest(random_state=0).fit(data).score_samples(data)
+    if_samp = IsolationForest(random_state=0).fit(numpy_data).score_samples(numpy_data)
     norm_if_scores = map(lambda x, r=float(np.max(if_samp) - np.min(if_samp)): ((x - np.min(if_samp)) / r), if_samp)
 
     #Local Outlier Factor
-    neg_out_arr = LocalOutlierFactor().fit(data).negative_outlier_factor_
+    neg_out_arr = LocalOutlierFactor().fit(numpy_data).negative_outlier_factor_
     norm_nog = map(lambda x, r=float(np.max(neg_out_arr) - np.min(neg_out_arr)): ((x - np.min(neg_out_arr)) / r), neg_out_arr)
 
     #Sihlouette
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
-    sil_arr = metrics.silhouette_samples(data, labels)
+    sil_arr = metrics.silhouette_samples(numpy_data, labels)
     sorted_sil_arr = sorted(sil_arr)
     norm_sil = map(lambda x, r=float(np.max(sil_arr) - np.min(sil_arr)): ((x - np.min(sil_arr)) / r), sil_arr)
 
@@ -192,18 +193,32 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
         question_set_indices += np.where(normalized_magic == v)
     #Creating neighbor to determine nearest nodes. 
     neighbor = NearestNeighbors()
-    neighbor.fit(data)
+    neighbor.fit(numpy_data)
     # Format for question_set: [valueQuestioned(VQ), VQSameNeighbor, VQ, VQDiffNeighbor, VQ2, VQ2SameNeighbor, VQ2, VQ2DiffNeighbor,...]
     # This format is used to support the transfer into javascript.
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
-        find_pair(1, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
+        find_pair(1, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
-        find_pair(2, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
+        find_pair(2, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
     print(question_set)
     print("SEPERATOR")
     print(sil_change_value)
+
+def generate_image():
+    x_axis = 0
+    y_axis = 1
+    model = pickle.load(open('interactive-constrained-clustering/src/model/temp/latest_model.sav', 'rb'))
+    df = pickle.load(open('interactive-constrained-clustering/src/model/temp/latest_df.sav', 'rb'))
+    numpy_data = pickle.load(open('interactive-constrained-clustering/src/model/temp/latest_numpy_data.sav', 'rb'))
+    labels = model.labels_
+    plt.scatter(numpy_data[:, x_axis], numpy_data[:, y_axis], c=labels, s=10, cmap=plt.cm.Set1)
+    plt.xlabel(df.columns[x_axis])
+    plt.ylabel(df.columns[y_axis])
+    print(df.columns[x_axis])
+    print(df.columns[y_axis])
+    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
 
 '''
 filename - filename within datasets folder to search for. 

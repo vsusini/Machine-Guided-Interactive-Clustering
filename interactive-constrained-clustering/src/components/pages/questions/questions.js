@@ -20,6 +20,9 @@ export const Questions = () => {
             console.log("Image Error")
         }
     }
+    function doNothing(){
+        console.log("beans");
+    }
     return (
         <>
             {
@@ -36,7 +39,23 @@ export const Questions = () => {
                                 <Notification text={context.notifMessage} show={context.warning} type="warning" func={context.changeClusterNum} />
                                 <div className="outerBorders rowNoMargin topOuterBorder">
                                     <Col>
-
+                                        <Row>
+                                            <Col>
+                                            </Col>
+                                            <Col className="text-center">
+                                                Chart Options
+                                                <Row>
+                                                    <Col>
+                                                        HOW THE FUCK DO YOU MAKE A DROP DOWN LIST?????
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col>
+                                                        WHY IS REACT SO FUCKING STUPID
+                                                    </Col>
+                                                </Row>
+                                            </Col>
+                                        </Row>
                                     </Col>
                                     <Col xs={3}>
                                         <ChartSlot
