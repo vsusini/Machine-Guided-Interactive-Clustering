@@ -67,6 +67,12 @@ export const Questions = () => {
     function updateImage(x, y){
         const formData = new FormData();
 
+        if (x==null){
+            x = 0;
+        }
+        if (y==null){
+            y = 1;
+        }
         formData.append('iter', yolo.iterationCount)
         formData.append('xaxis', x)
         formData.append('yaxis', y)
@@ -83,7 +89,7 @@ export const Questions = () => {
     }
     
     useEffect(() => {
-        updateImage()
+        //updateImage()
         
     },[]);
 
