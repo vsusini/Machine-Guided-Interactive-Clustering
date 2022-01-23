@@ -17,11 +17,9 @@ def convert_problematic_data(data):
     Returns an updated dataframe with one hot encoding. 
     '''
     df = data.infer_objects() 
-    print(df.dtypes)
     category_columns = []
     # Determine which columns are categorical
     for column in df:
-        print(df[column].dtype)
         if(df[column].dtype == "object"):
             df[column] = df[column].astype('category')
             df = df.drop(columns=[column]) #Drop em for now but gotta actually do something with em later
@@ -68,21 +66,28 @@ def search_in_question_set(set, v1, v2):
 
 def find_pair(index, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints): 
         found = False
+        # find closest neighbor to point at index
+        # closest_neightbor_index is list of points in order of closeness to data[value]
         closest_neighbor_index = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
         while not found:
             try:
+                #if point is not in same cluster as given point
                 if labels[closest_neighbor_index[index]] != labels[value[0]]:
                     found = search_in_question_set(
                         question_set, value[0], closest_neighbor_index[index])
+                    # if point is not already in the question set
                     if found:
                         found = search_in_question_set(
                             must_link_constraints, value[0], closest_neighbor_index[index])
+                        # if point is not already in the must link constraints
                         if found:
                             found = search_in_question_set(
                                 cant_link_constraints, value[0], closest_neighbor_index[index])
+                            # if point is not already in the cannot link constraints
                             if found:
                                 found = search_in_question_set(
                                     unknown_constraints, value[0], closest_neighbor_index[index])
+                # if point was not in the question set, mustlink, cannot link, or unknown constraints
                 if found:
                     question_set.append(value[0])
                     question_set.append(closest_neighbor_index[index])
@@ -93,7 +98,20 @@ def find_pair(index, neighbor, data, value, labels, question_set, must_link_cons
                 print(3)
                 raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
 
+
 def compute_questions(filename, cluster_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
+    '''
+    Args:
+        filename: name of the csv file
+        cluster_iter: what iteration we are currently on
+        question_num: Questions per iteration rounded down to nearest even number
+        must_link_constraints: 
+        cant_link_constraints:
+        unknown_constraints:
+    '''
+    
+    # ================Generate clustering model================
+
     df = convert_problematic_data(pd.read_csv('datasets/' + filename))
     numpy_data = df.to_numpy()
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
@@ -129,20 +147,20 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
             print(1)
             raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
 
-    labels = model.labels_
+    # ================Generate graph for website================
 
-    # Save model and data.
+    # Save model and data for the image generation.
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
     pickle.dump(model, open('interactive-constrained-clustering/src/model/temp/latest_model.sav', 'wb'))
     pickle.dump(numpy_data, open('interactive-constrained-clustering/src/model/temp/latest_numpy_data.sav', 'wb'))
     pickle.dump(df, open('interactive-constrained-clustering/src/model/temp/latest_df.sav', 'wb'))
 
+    # ================Evaluate clustering model================
 
-    # Creation of graph for image.
-    generate_image()
+    labels = model.labels_
 
-    #Isolation Forest Anomoly Score
+    #Isolation Forest Anomaly Score
     if_samp = IsolationForest(random_state=0).fit(numpy_data).score_samples(numpy_data)
     norm_if_scores = map(lambda x, r=float(np.max(if_samp) - np.min(if_samp)): ((x - np.min(if_samp)) / r), if_samp)
 
@@ -186,6 +204,8 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     print(sorted_norm_magic[-1])
     print("SEPERATOR")
 
+    # ================Decide what questions to ask clustering model================
+
     question_set_indices = []
     # Interested in question_num/2 unreliable data points as we will compare the nearest neighbour of same node and nearest neighbour of a diffrent node
     # Converting the lowest indecies into an array of list(index,index) based on nearest sets of clusters.
@@ -199,26 +219,20 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
+        # TODO: Does this one also make sure they don't have the same cluster?
         find_pair(1, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
+        # TODO: Does it actually do this?
         find_pair(2, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
     print(question_set)
     print("SEPERATOR")
     print(sil_change_value)
 
-def generate_image():
-    x_axis = 0
-    y_axis = 1
-    model = pickle.load(open('interactive-constrained-clustering/src/model/temp/latest_model.sav', 'rb'))
-    df = pickle.load(open('interactive-constrained-clustering/src/model/temp/latest_df.sav', 'rb'))
-    numpy_data = pickle.load(open('interactive-constrained-clustering/src/model/temp/latest_numpy_data.sav', 'rb'))
-    labels = model.labels_
-    plt.scatter(numpy_data[:, x_axis], numpy_data[:, y_axis], c=labels, s=10, cmap=plt.cm.Set1)
-    plt.xlabel(df.columns[x_axis])
-    plt.ylabel(df.columns[y_axis])
-    print(df.columns[x_axis])
-    print(df.columns[y_axis])
-    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
+    # print the column names so the ui can populate the drop down menus
+    print("SEPERATOR")
+    print(list(df.columns.values))
+    
+
 
 '''
 filename - filename within datasets folder to search for. 
