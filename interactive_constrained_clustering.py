@@ -12,25 +12,21 @@ from pandas.api.types import is_object_dtype, is_bool_dtype
 
 def convert_problematic_data(data):
     '''
-    Takes a dataset
+    Takes a pandas dataframe
     Converts all data that is not numerical into numerical data. 
-    Returns an updated dataset with all numiercal values. 
+    Returns an updated dataframe with one hot encoding. 
     '''
-    df = pd.DataFrame(data=data)
-    df = df.infer_objects() 
+    df = data.infer_objects() 
     category_columns = []
     # Determine which columns are categorical
-    for i in range(0, len(df.columns)):
-        if is_object_dtype(df[i]) or is_bool_dtype(df[i]):
-            category_columns.append(i)
-    #Convert all the category columns into values
-    for i in category_columns:
-        if is_object_dtype(df[i]):
-            df[i] = df[i].astype('category')
-            df[i] = df[i].cat.codes
-        elif is_bool_dtype(df[i]):
-            df[i] = df[i].replace([True,False],[1,0])
-    return df.to_numpy()
+    for column in df:
+        if(df[column].dtype == "object"):
+            df[column] = df[column].astype('category')
+            df = df.drop(columns=[column]) #Drop em for now but gotta actually do something with em later
+        elif(df[column].dtype == "bool"):
+            df = df.drop(columns=[column]) #Drop these too for now
+    #TODO: One hot encoding
+    return df
 
 def create_constraint(links):
     '''
@@ -70,21 +66,28 @@ def search_in_question_set(set, v1, v2):
 
 def find_pair(index, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints): 
         found = False
+        # find closest neighbor to point at index
+        # closest_neightbor_index is list of points in order of closeness to data[value]
         closest_neighbor_index = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
         while not found:
             try:
+                #if point is not in same cluster as given point
                 if labels[closest_neighbor_index[index]] != labels[value[0]]:
                     found = search_in_question_set(
                         question_set, value[0], closest_neighbor_index[index])
+                    # if point is not already in the question set
                     if found:
                         found = search_in_question_set(
                             must_link_constraints, value[0], closest_neighbor_index[index])
+                        # if point is not already in the must link constraints
                         if found:
                             found = search_in_question_set(
                                 cant_link_constraints, value[0], closest_neighbor_index[index])
+                            # if point is not already in the cannot link constraints
                             if found:
                                 found = search_in_question_set(
                                     unknown_constraints, value[0], closest_neighbor_index[index])
+                # if point was not in the question set, mustlink, cannot link, or unknown constraints
                 if found:
                     question_set.append(value[0])
                     question_set.append(closest_neighbor_index[index])
@@ -95,8 +98,22 @@ def find_pair(index, neighbor, data, value, labels, question_set, must_link_cons
                 print(3)
                 raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
 
+
 def compute_questions(filename, cluster_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
-    data = convert_problematic_data(pd.read_csv('datasets/'+filename).to_numpy())
+    '''
+    Args:
+        filename: name of the csv file
+        cluster_iter: what iteration we are currently on
+        question_num: Questions per iteration rounded down to nearest even number
+        must_link_constraints: 
+        cant_link_constraints:
+        unknown_constraints:
+    '''
+    
+    # ================Generate clustering model================
+
+    df = convert_problematic_data(pd.read_csv('datasets/' + filename))
+    numpy_data = df.to_numpy()
     # Will not be aware of ml or cl constraints until after user passes Iteration 1
     if int(cluster_iter) != 1:
         ml_converted = [i for i in zip(*[iter(must_link_constraints)]*2)]
@@ -107,51 +124,53 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
         # Applying new constraints to the model
         model = PCKMeans(n_clusters=cluster_num)
         try:
-            model.fit(data, ml=ml, cl=cl)
+            model.fit(numpy_data, ml=ml, cl=cl)
         except InconsistentConstraintsException:
             # Error 2 sent to client to handle properly.
             print(2)
             raise InconsistentConstraintsException("Inconsistent constraints")
         clusters_inc_model = PCKMeans(n_clusters=cluster_num+1)
-        clusters_inc_model.fit(data, ml=ml, cl=cl)
+        clusters_inc_model.fit(numpy_data, ml=ml, cl=cl)
         #Don't need to sort these as avg is the only value being taken from this. 
-        cluster_inc_sil_arr = metrics.silhouette_samples(data, clusters_inc_model.labels_)
+        cluster_inc_sil_arr = metrics.silhouette_samples(numpy_data, clusters_inc_model.labels_)
         if cluster_num > 2:
             clusters_dec_model = PCKMeans(n_clusters=cluster_num-1)
-            clusters_dec_model.fit(data, ml=ml, cl=cl)
+            clusters_dec_model.fit(numpy_data, ml=ml, cl=cl)
             #Don't need to sort these as avg is the only value being taken from this. 
-            cluster_dec_sil_arr = metrics.silhouette_samples(data, clusters_dec_model.labels_)
+            cluster_dec_sil_arr = metrics.silhouette_samples(numpy_data, clusters_dec_model.labels_)
     else:
         model = PCKMeans(n_clusters=cluster_num)
         try:
-            model.fit(data)
+            model.fit(numpy_data)
         except TypeError:
             # Error 1 sent to client to handle properly.
             print(1)
             raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
 
-    labels = model.labels_
-    # Creation of graph for image.
-    # plt.style.use('dark_background') for landing page pic
-    plt.scatter(data[:, 0], data[:, 1], c=labels, s=10, cmap=plt.cm.RdBu)
-    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
-    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
+    # ================Generate graph for website================
 
-    # Save model.
+    # Save model and data for the image generation.
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
+    pickle.dump(model, open('interactive-constrained-clustering/src/model/temp/latest_model.sav', 'wb'))
+    pickle.dump(numpy_data, open('interactive-constrained-clustering/src/model/temp/latest_numpy_data.sav', 'wb'))
+    pickle.dump(df, open('interactive-constrained-clustering/src/model/temp/latest_df.sav', 'wb'))
 
-    #Isolation Forest Anomoly Score
-    if_samp = IsolationForest(random_state=0).fit(data).score_samples(data)
+    # ================Evaluate clustering model================
+
+    labels = model.labels_
+
+    #Isolation Forest Anomaly Score
+    if_samp = IsolationForest(random_state=0).fit(numpy_data).score_samples(numpy_data)
     norm_if_scores = map(lambda x, r=float(np.max(if_samp) - np.min(if_samp)): ((x - np.min(if_samp)) / r), if_samp)
 
     #Local Outlier Factor
-    neg_out_arr = LocalOutlierFactor().fit(data).negative_outlier_factor_
+    neg_out_arr = LocalOutlierFactor().fit(numpy_data).negative_outlier_factor_
     norm_nog = map(lambda x, r=float(np.max(neg_out_arr) - np.min(neg_out_arr)): ((x - np.min(neg_out_arr)) / r), neg_out_arr)
 
     #Sihlouette
     # Passing my data (data) and the certain cluster that each data point from X should be based on our model.
-    sil_arr = metrics.silhouette_samples(data, labels)
+    sil_arr = metrics.silhouette_samples(numpy_data, labels)
     sorted_sil_arr = sorted(sil_arr)
     norm_sil = map(lambda x, r=float(np.max(sil_arr) - np.min(sil_arr)): ((x - np.min(sil_arr)) / r), sil_arr)
 
@@ -185,6 +204,8 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     print(sorted_norm_magic[-1])
     print("SEPERATOR")
 
+    # ================Decide what questions to ask clustering model================
+
     question_set_indices = []
     # Interested in question_num/2 unreliable data points as we will compare the nearest neighbour of same node and nearest neighbour of a diffrent node
     # Converting the lowest indecies into an array of list(index,index) based on nearest sets of clusters.
@@ -192,18 +213,26 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
         question_set_indices += np.where(normalized_magic == v)
     #Creating neighbor to determine nearest nodes. 
     neighbor = NearestNeighbors()
-    neighbor.fit(data)
+    neighbor.fit(numpy_data)
     # Format for question_set: [valueQuestioned(VQ), VQSameNeighbor, VQ, VQDiffNeighbor, VQ2, VQ2SameNeighbor, VQ2, VQ2DiffNeighbor,...]
     # This format is used to support the transfer into javascript.
     question_set = []
     for value in question_set_indices:
         # Sets the even value of the array to the nearest neighbour.
-        find_pair(1, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
+        # TODO: Does this one also make sure they don't have the same cluster?
+        find_pair(1, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
         # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
-        find_pair(2, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
+        # TODO: Does it actually do this?
+        find_pair(2, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
     print(question_set)
     print("SEPERATOR")
     print(sil_change_value)
+
+    # print the column names so the ui can populate the drop down menus
+    print("SEPERATOR")
+    print(list(df.columns.values))
+    
+
 
 '''
 filename - filename within datasets folder to search for. 
