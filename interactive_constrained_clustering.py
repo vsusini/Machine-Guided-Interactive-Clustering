@@ -9,6 +9,8 @@ from sklearn.neighbors import NearestNeighbors, LocalOutlierFactor
 from sklearn.ensemble import IsolationForest
 import pandas as pd
 from pandas.api.types import is_object_dtype, is_bool_dtype
+from pyod.models.abod import ABOD
+from anomatools.anomaly_detection import INNE
 
 def convert_problematic_data(data):
     '''
@@ -142,6 +144,14 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
 
     labels = model.labels_
 
+    #iNNE
+    iNNEVal = INNE().fit(numpy_data).predict(numpy_data)[0]
+    norm_inne_scores = map(lambda x, r=float(np.max(iNNEVal) - np.min(iNNEVal)): ((x - np.min(iNNEVal)) / r), iNNEVal)
+
+    #Angle-Based Outlier Detector
+    ABODVal = ABOD().fit(numpy_data).decision_scores_ 
+    norm_abod_scores = map(lambda x, r=float(np.max(ABODVal) - np.min(ABODVal)): ((x - np.min(ABODVal)) / r), ABODVal)
+
     #Isolation Forest Anomaly Score
     if_samp = IsolationForest(random_state=0).fit(numpy_data).score_samples(numpy_data)
     norm_if_scores = map(lambda x, r=float(np.max(if_samp) - np.min(if_samp)): ((x - np.min(if_samp)) / r), if_samp)
@@ -173,7 +183,8 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
 
 
     #Take all the normalized metric arrays, determine the avg to provide for question determination
-    normalized_magic = [((x*0.5) + (y*0.25) + (z*0.25)) for x, y, z in zip(norm_sil, norm_nog, norm_if_scores)]
+    normalized_magic = [((v*0.20) + (w*0.20) + (x*0.20) + (y*0.20) + (z*0.20)) for v, w, x, y, z in zip(norm_sil, norm_nog, norm_if_scores, norm_abod_scores, norm_inne_scores)]
+
     sorted_norm_magic = sorted(normalized_magic)
 
     #Min
