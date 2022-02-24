@@ -18,7 +18,6 @@ export const AppContext = React.createContext({
   notifMessage: "",
   output: PythonOutput,
   stats: Stats,
-  columns: [],
   changeClusterNum: () => { },
   saveData: () => { },
   trackPython: () => { },
@@ -43,7 +42,6 @@ class App extends Component {
       notifMessage: "",
       output: "",
       stats: "",
-      columns: [],
       changeClusterNum: this.changeClusterNum,
       saveData: this.saveData,
       trackPython: this.trackPython,
@@ -107,7 +105,6 @@ class App extends Component {
             //Passed all the errors, continue on with the process. 
             this.setState({ stats: new Stats(formState.cl.length, formState.ml.length, formState.unknown.length, formState.maxConstraintPercent, this.state.dataArr.data.length, outputArr[1], outputArr[2], outputArr[0]) })
             this.setState({ output: new PythonOutput(outputArr[3].trim()) })
-            this.setState({ columns: outputArr[5].slice(3,-3).split(",")})
             if (parseInt(outputArr[4]) !== 0) {
               this.setState({ warning: true })
               if (parseInt(outputArr[4]) === 4) {

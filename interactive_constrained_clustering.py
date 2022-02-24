@@ -148,6 +148,12 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
             raise TypeError("There exists a string values in the dataset that the tool was unable to handle properly.")
 
     # ================Generate graph for website================
+    labels = model.labels_
+    # Creation of graph for image.
+    # plt.style.use('dark_background') for landing page pic
+    plt.scatter(numpy_data[:, 0], numpy_data[:, 1], c=labels, s=10, cmap=plt.cm.RdBu)
+    plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
+    # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
 
     # Save model and data for the image generation.
     #dump(obj, open(filename, mode))
