@@ -51,52 +51,34 @@ def create_constraint(links):
                 final_link.append((int(link2[1]), int(link[0])))
     return final_link
 
-def search_in_question_set(set, v1, v2):
+def constraint_already_exists(constraint_sets, v1, v2):
     '''
-    Supports in question_set calculation. 
-    Checks if two samples are already inputed to the question set or not. 
+    Checks if a constraint between v1 and v2 exists in constraint_sets
+    constraint_sets should be a 2d list of constraints 
+    eg. if the must link constraints were (1,2) and (3,4), the cannot link constrains were (5,6) and (7,8) and the unknown constraints were (9,0) constraint_sets would look like:
+    [[1,2,3,4],
+    [5,6,7,8],
+    [9,0]]
     '''
-    for i in range(len(set)-1):
-        #print("Set[i]: " ,set[i], "Set[i+1]:", set[i+1], "V1: " ,v1, "V2: ", v2 )
-        if int(set[i]) == int(v1) and int(set[i+1]) == int(v2):
-            return False
-        if int(set[i]) == int(v2) and int(set[i+1]) == int(v1):
-            return False
-    return True
+    for constraint_set in constraint_sets:
+        for i in range(0, len(constraint_set)-1, 2):
+            if int(constraint_set[i]) == int(v1) and int(constraint_set[i+1]) == int(v2) or int(constraint_set[i]) == int(v2) and int(constraint_set[i+1]) == int(v1):
+                return True
+    return False
 
-def find_pair(index, neighbor, data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints): 
-        found = False
-        # find closest neighbor to point at index
-        # closest_neightbor_index is list of points in order of closeness to data[value]
-        closest_neighbor_index = neighbor.kneighbors(data[value].reshape(1, -1), n_neighbors=len(data))[1][0]
-        while not found:
-            try:
-                #if point is not in same cluster as given point
-                if labels[closest_neighbor_index[index]] != labels[value[0]]:
-                    found = search_in_question_set(
-                        question_set, value[0], closest_neighbor_index[index])
-                    # if point is not already in the question set
-                    if found:
-                        found = search_in_question_set(
-                            must_link_constraints, value[0], closest_neighbor_index[index])
-                        # if point is not already in the must link constraints
-                        if found:
-                            found = search_in_question_set(
-                                cant_link_constraints, value[0], closest_neighbor_index[index])
-                            # if point is not already in the cannot link constraints
-                            if found:
-                                found = search_in_question_set(
-                                    unknown_constraints, value[0], closest_neighbor_index[index])
-                # if point was not in the question set, mustlink, cannot link, or unknown constraints
-                if found:
-                    question_set.append(value[0])
-                    question_set.append(closest_neighbor_index[index])
-                    found = True
-                index += 1
-            except IndexError:
-                # Error 3 sent to client to handle properly.
-                print(3)
-                raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
+def find_nearest_neighbor(neighbors, numpy_data, value, labels, same_cluster, constraints=[]):
+    '''
+    Finds and returns the nearest neighbor to the item at numpy_data[value] with either the same or different label depending on same_cluster 
+    '''
+    closest_neighbor_index = neighbors.kneighbors(numpy_data[value].reshape(1, -1), n_neighbors=len(numpy_data))[1][0]
+
+    for i in range(1, len(closest_neighbor_index)):
+        # If the labels are the same and same_cluster is true or the labels are different and same_cluster is false
+        if (labels[closest_neighbor_index[i]] == labels[value[0]]) == same_cluster and not constraint_already_exists(constraints, closest_neighbor_index[i], value[0]):
+            return closest_neighbor_index[i]
+    
+    print(3)
+    raise IndexError("Unable to find another Sample to match "+ str(value[0]) +" with due to constraints.")
 
 
 def compute_questions(filename, cluster_iter, question_num, cluster_num, must_link_constraints, cant_link_constraints, unknown_constraints):
@@ -154,7 +136,6 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     plt.scatter(numpy_data[:, 0], numpy_data[:, 1], c=labels, s=10, cmap=plt.cm.RdBu)
     plt.savefig("interactive-constrained-clustering/src/images/clusterImg" + cluster_iter, orientation='portrait')  # dpi=100 for landing page pic
     # plt.savefig("interactive-constrained-clustering/src/images/clusterImg"+cluster_iter)
-
     # Save model and data for the image generation.
     #dump(obj, open(filename, mode))
     pickle.dump(model, open('interactive-constrained-clustering/src/model/finalized_model.sav', 'wb'))
@@ -217,19 +198,22 @@ def compute_questions(filename, cluster_iter, question_num, cluster_num, must_li
     # Converting the lowest indecies into an array of list(index,index) based on nearest sets of clusters.
     for v in sorted_norm_magic[:int(question_num/2)]:
         question_set_indices += np.where(normalized_magic == v)
+
     #Creating neighbor to determine nearest nodes. 
     neighbor = NearestNeighbors()
     neighbor.fit(numpy_data)
     # Format for question_set: [valueQuestioned(VQ), VQSameNeighbor, VQ, VQDiffNeighbor, VQ2, VQ2SameNeighbor, VQ2, VQ2DiffNeighbor,...]
     # This format is used to support the transfer into javascript.
     question_set = []
+
     for value in question_set_indices:
-        # Sets the even value of the array to the nearest neighbour.
-        # TODO: Does this one also make sure they don't have the same cluster?
-        find_pair(1, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
-        # Sets the odd values of the array to the nearest neighbour that doens't have the same cluster value
-        # TODO: Does it actually do this?
-        find_pair(2, neighbor, numpy_data, value, labels, question_set, must_link_constraints, cant_link_constraints, unknown_constraints)
+        # Creates an "odd" question with value and the nearest neighbour to value that is in the same cluster and has no existing constraints with value
+        question_set.append(value[0])
+        question_set.append(find_nearest_neighbor(neighbor, numpy_data, value, labels, True, constraints=[must_link_constraints, cant_link_constraints, unknown_constraints]))
+        # Creates and "even" question with value and the nearest neighbour to value that is in a different cluster and has no existing constraints with value
+        question_set.append(value[0])
+        question_set.append(find_nearest_neighbor(neighbor, numpy_data, value, labels, False, constraints=[must_link_constraints, cant_link_constraints, unknown_constraints]))
+
     print(question_set)
     print("SEPERATOR")
     print(sil_change_value)
