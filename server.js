@@ -59,6 +59,32 @@ app.post('/python', (req, res) => {
         return res.send({ name: values })
     });
 })
+
+app.post('/python/image', (req, res) => {
+    console.log('ddd')
+    var pythonArr = ['image_generation.py', req.body.iter, req.body.xaxis, req.body.yaxis]
+
+    console.log(pythonArr)
+
+    const spawn = require('child_process').spawn;
+    const ls = spawn('python', pythonArr);
+
+    var values = ""
+
+    ls.stdout.on('data', (data) => {
+        values += data.toString()
+    });
+
+    ls.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+    });
+
+    ls.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+        console.log("values", values)
+        return res.send({ name: values })
+    });
+})
 app.listen(port, () => {
     console.log('server is running at port ' + port);
 })
